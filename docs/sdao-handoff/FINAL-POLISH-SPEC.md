@@ -67,11 +67,32 @@ Each slice is one task (CLAUDE.md section 3): tests first for logic, then `npm t
 4. **Server-paginated lists** (staff Cases, Appointments, Students, and the clearance roster used by F6) send `pageSize`. The API accepts an optional `pageSize` query parameter, validated at the route boundary and clamped to 3–50; when it is missing the current default applies, so old clients are unchanged. A route test per endpoint covers the default, the clamp and an invalid value. When the size changes, the list keeps the selected record's page (`focus` already does this for Cases).
 5. **Grouped Cases.** Each status group starting on the page takes one group-head height from the space. The API returns the rows; the client reserves `groupHeadHeight × (number of status groups in statusCounts that are non-empty, at most the rows shown)` before asking. If a page still overflows by one group head (rare), the body scrolls by that one row rather than hiding data.
 6. **Client-paginated lists** (Inbox, student Handbook, student Violations, student Sanctions, staff Sanction templates, staff Violations) slice locally with the measured count.
-7. **Dashboard cards** (staff and student): show the first N rows that fit, using the same `fitRows`; the "View all" link stays. No empty block is left under the rows.
+7. **Dashboard cards** (staff and student): see "Dashboard rule" below.
+
+**General rule (every screen, present and future).** A list or card that renders items must fill its container: it shows as many rows as fit (`fitRows`), shows a pager only when more rows exist than fit, and never leaves an empty block taller than one row beneath the items. Where the item count is below what fits, the card shrinks to its content and its column neighbour grows to match.
+
+**Dashboard rule.** Each dashboard list measures its own body and renders `fitRows` rows instead of a fixed 3 or 5. "View all" covers the rest, and the two columns end level. There is no pager on a dashboard card. Named cards:
+
+- Student: Active violations, Next appointment, Active sanctions, Clearance, Student Handbook.
+- Staff: Reports to validate, Awaiting decision, Upcoming appointments, Sanctions, Clearance work.
+
+**Audit (read from the code, 2026-10-18).** The dev re-checks each row at 1366×768 and 1920×1080 and records the result next to it in `CONTEXT.md`.
+
+| Screen | Today | Fix |
+|---|---|---|
+| Student dashboard, Active violations | `.slice(0, 5)`, `pages/student/Dashboard.tsx:49`; list box `min-h-[172px] flex-1`, `components/dashboard/DashboardCards.tsx:114`, so a tall card shows blank space under 5 rows | Measure and fit |
+| Student dashboard, Active sanctions | `.slice(0, 3)`, `pages/student/Dashboard.tsx:123`, same box | Measure and fit |
+| Student dashboard, Next appointment, Clearance, Handbook | One summary each, no row list | Check the columns end level |
+| Staff dashboard, Reports to validate, Awaiting decision, Upcoming appointments, Sanctions, Clearance work | All `.slice(0, 3)`, `pages/staff/Dashboard.tsx:91,128,164,210,248`; Reports to validate shows a large empty area | Measure and fit |
+| Staff Cases, Appointments, Students; clearance roster used by F6 | Fixed API page size (6, 5, 20, 20) | Measure and send `pageSize` |
+| Inbox (both roles), student Handbook, student Violations | Fixed client page size (6, 6, 5) | Measure and fit |
+| Student Sanctions, staff Sanction templates, staff Violations (handbook), bell popover | Scroll lists, no pager | Check no empty block; scroll stays |
+| Student Appointments (Upcoming, History), student Clearance requirements | Whole list rendered, page scrolls | Check only; no pager is added |
+| Staff student-record lists, sanction queue, case Files tab | Own lists inside a detail pane or queue | Check no empty block under the rows |
 
 Applies to: `pages/staff/Cases.tsx`, `pages/staff/appointments/AppointmentList.tsx`, `pages/staff/students/StudentList.tsx`, `pages/shared/Inbox.tsx`, `pages/student/handbook/HandbookTable.tsx`, `pages/student/violations/ViolationTable.tsx`, `pages/student/sanctions/SanctionTable.tsx`, `pages/staff/templates/TemplateList.tsx`, `pages/staff/handbook/ViolationList.tsx`, `components/dashboard/DashboardCards.tsx`.
 
-Done when, at a 1366×768 window and a 1920×1080 window: no list shows both a pager and a scrollbar; no list shows a pager while it has room for at least one more row; rows are the same height as before.
+Done when, at a 1366×768 window and a 1920×1080 window: no list shows both a pager and a scrollbar; no list shows a pager while it has room for at least one more row; rows are the same height as before; no card or list shows an empty block taller than one row; both dashboards end their columns level.
 
 ### F2. Detail panes keep their frame when scrolled (item 1.1)
 
