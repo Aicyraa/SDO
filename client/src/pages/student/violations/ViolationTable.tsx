@@ -8,12 +8,12 @@ import { cn } from '@/utils/cn';
 import { formatDate, violationTitle } from '@/utils/format';
 import { caseTag } from '@/utils/studentView';
 
-export const VIOLATIONS_PER_PAGE = 5;
-
-/** The My violations table (deck src 1111 to 1143): heads from the rail width up, 52 px rows, 5 per page. */
+/** The My violations table (deck src 1111 to 1143): heads from the rail width up, 52 px rows, as many per page as fit (F1). */
 export function ViolationTable({
   rows,
   page,
+  perPage,
+  areaRef,
   onPage,
   selectedId,
   resolvedCount,
@@ -22,13 +22,16 @@ export function ViolationTable({
 }: {
   rows: StudentCaseView[];
   page: number;
+  /** Rows per page, measured by the page's `useFitRows`. */
+  perPage: number;
+  areaRef: (element: HTMLDivElement | null) => void;
   onPage: (page: number) => void;
   selectedId: number | null;
   resolvedCount: number;
   showResolved: boolean;
   onToggleResolved: () => void;
 }) {
-  const shown = rows.slice((page - 1) * VIOLATIONS_PER_PAGE, page * VIOLATIONS_PER_PAGE);
+  const shown = rows.slice((page - 1) * perPage, page * perPage);
   return (
     <ListCard className="flex min-h-0 flex-1 flex-col">
       <div className="hidden grid-cols-[minmax(0,118px)_minmax(0,1fr)_120px] gap-3 border-b border-line-soft bg-surface-2 px-6 py-3 text-[13px] font-semibold text-muted rail:grid">
@@ -36,13 +39,15 @@ export function ViolationTable({
         <span>Violation</span>
         <span>Status</span>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
+      <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
         {shown.length === 0 ? <p className="px-4 py-5 text-center text-[13px] text-muted">No violations match these filters.</p> : null}
         {shown.map((row) => {
           const tag = caseTag(row);
           const selected = row.id === selectedId;
           return (
             <Link
+              data-fit-row
               key={row.id}
               to={`/violations/${row.id}`}
               state={{ fromList: true }}
@@ -72,7 +77,7 @@ export function ViolationTable({
           );
         })}
       </div>
-      <Pager page={page} pageCount={Math.max(1, Math.ceil(rows.length / VIOLATIONS_PER_PAGE))} onChange={onPage} className="mt-auto border-t border-line-soft py-2.5" />
+      <Pager page={page} pageCount={Math.max(1, Math.ceil(rows.length / perPage))} onChange={onPage} className="mt-auto border-t border-line-soft py-2.5" />
       {resolvedCount > 0 || showResolved ? (
         <button
           type="button"
@@ -82,6 +87,7 @@ export function ViolationTable({
           {showResolved ? 'Show active cases' : `Show resolved cases (${resolvedCount})`}
         </button>
       ) : null}
+      </div>
     </ListCard>
   );
 }

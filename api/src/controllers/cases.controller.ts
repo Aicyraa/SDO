@@ -39,7 +39,7 @@ export function createCaseController({ service, queries, now }: CaseControllerDe
     const input = parseCaseListQuery(request.query);
     if (!input.ok) return sendError(response, 400, 'invalid_input', input.message);
     const { rows, total, statusCounts, page } = await queries.list(input.value);
-    sendOk(response, { cases: rows, total, statusCounts, page, pageSize: CASE_PAGE_SIZE });
+    sendOk(response, { cases: rows, total, statusCounts, page, pageSize: input.value.pageSize ?? CASE_PAGE_SIZE });
   };
 
   const detail: RequestHandler = async (request, response) => {

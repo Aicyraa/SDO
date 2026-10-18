@@ -2,6 +2,7 @@ import type { CaseStatus, Severity } from '@shared/types.js';
 import { STUDENT_ID_PATTERN } from '../domain/auth/policy.js';
 import { CASE_STATUSES } from '../domain/cases/status.js';
 import { invalid, valid, type Validated } from '../helpers/validation.js';
+import { parsePageSize } from './common.validators.js';
 
 const STATUSES = CASE_STATUSES;
 const SEVERITIES: readonly Severity[] = ['Minor', 'Major'];
@@ -16,6 +17,8 @@ export interface CaseListInput {
   sort: 'newest' | 'oldest';
   group?: 'status';
   page: number;
+  /** Rows per page the client can fit (3 to 50); the default size when absent. */
+  pageSize?: number;
   focus?: number;
 }
 
@@ -31,6 +34,8 @@ export function parseCaseListQuery(query: Record<string, unknown>): Validated<Ca
   if (page !== undefined && !(typeof page === 'string' && /^[1-9]\d{0,5}$/.test(page))) {
     return invalid('page must be a positive whole number.');
   }
+  const pageSize = parsePageSize(query.pageSize);
+  if (!pageSize.ok) return pageSize;
   return valid({
     status: status as CaseStatus | undefined,
     severity: severity as Severity | undefined,
@@ -38,6 +43,7 @@ export function parseCaseListQuery(query: Record<string, unknown>): Validated<Ca
     sort: sort === 'oldest' ? 'oldest' : 'newest',
     group: group === 'status' ? 'status' : undefined,
     page: page === undefined ? 1 : Number(page),
+    pageSize: pageSize.value,
     focus: focus === undefined ? undefined : Number(focus),
   });
 }

@@ -17,6 +17,8 @@ export interface AppointmentListFilter {
   /** YYYY-MM-DD: the window holds this day (wins over `range`). */
   on?: string;
   page: number;
+  /** Rows per page; `APPOINTMENT_PAGE_SIZE` when absent. */
+  pageSize?: number;
   /** Answer the page that holds this appointment instead of `page` (deep links); ignored when no match holds it. */
   focus?: number;
   /** Asia/Manila calendar day, YYYY-MM-DD. */
@@ -88,15 +90,16 @@ export function appointmentIdFromCode(text: string): number | null {
 /** Orders the matches, picks the page (the one holding `focus` when given) and counts the groups. */
 export function pageAppointments<T extends AppointmentKey>(
   matches: readonly T[],
-  filter: Pick<AppointmentListFilter, 'page' | 'focus' | 'today'>,
+  filter: Pick<AppointmentListFilter, 'page' | 'pageSize' | 'focus' | 'today'>,
 ): { page: number; pageKeys: T[]; total: number; counts: { upcoming: number; closed: number } } {
+  const size = filter.pageSize ?? APPOINTMENT_PAGE_SIZE;
   const ordered = orderAppointments(matches, filter.today);
   const index = filter.focus === undefined ? -1 : ordered.findIndex((k) => k.id === filter.focus);
-  const page = index < 0 ? filter.page : Math.floor(index / APPOINTMENT_PAGE_SIZE) + 1;
+  const page = index < 0 ? filter.page : Math.floor(index / size) + 1;
   const upcoming = ordered.filter((k) => isUpcoming(k, filter.today)).length;
   return {
     page,
-    pageKeys: ordered.slice((page - 1) * APPOINTMENT_PAGE_SIZE, page * APPOINTMENT_PAGE_SIZE),
+    pageKeys: ordered.slice((page - 1) * size, page * size),
     total: ordered.length,
     counts: { upcoming, closed: ordered.length - upcoming },
   };

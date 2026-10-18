@@ -262,6 +262,17 @@ describe('GET /appointments?bucket=all: one list with filters (UI-POLISH-SPEC D6
     expect(ids(await staff.get('/appointments').query({ bucket: 'all', page: 2 }))).toEqual([3]);
   });
 
+  test('pageSize sets the rows per page, is clamped to 3 to 50, and refuses non-numbers', async () => {
+    const staff = await seeded();
+    const four = await staff.get('/appointments').query({ bucket: 'all', pageSize: 4, page: 2 });
+    expect(ids(four)).toEqual([6, 3]);
+    expect(four.body.data.pageSize).toBe(4);
+    const tiny = await staff.get('/appointments').query({ bucket: 'all', pageSize: 1 });
+    expect(tiny.body.data.pageSize).toBe(3);
+    expect(ids(tiny)).toEqual([2, 1, 5]);
+    expect((await staff.get('/appointments').query({ bucket: 'all', pageSize: 'abc' })).status).toBe(400);
+  });
+
   test('status, dates (today, next 7 days, past) and one day', async () => {
     const staff = await seeded();
     expect(ids(await staff.get('/appointments').query({ bucket: 'all', status: 'scheduled' }))).toEqual([1, 5, 6]);

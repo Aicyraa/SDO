@@ -251,6 +251,20 @@ describe('GET /cases', () => {
     expect(second.body.data.cases.map((c: { id: number }) => c.id)).toEqual([2, 1]);
   });
 
+  test('pageSize sets the rows per page, is clamped to 3 to 50, and refuses non-numbers', async () => {
+    const agent = await staff();
+    const four = await agent.get('/cases?pageSize=4&page=2');
+    expect(four.body.data).toMatchObject({ total: 8, page: 2, pageSize: 4 });
+    expect(four.body.data.cases.map((c: { id: number }) => c.id)).toEqual([4, 3, 2, 1]);
+    const tiny = await agent.get('/cases?pageSize=1');
+    expect(tiny.body.data.pageSize).toBe(3);
+    expect(tiny.body.data.cases).toHaveLength(3);
+    const huge = await agent.get('/cases?pageSize=500');
+    expect(huge.body.data.pageSize).toBe(50);
+    expect(huge.body.data.cases).toHaveLength(8);
+    expect((await agent.get('/cases?pageSize=abc')).status).toBe(400);
+  });
+
   test('sorts oldest first', async () => {
     const agent = await staff();
     const response = await agent.get('/cases?sort=oldest');

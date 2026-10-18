@@ -4,8 +4,6 @@ import { templateState } from './templates';
 
 /** The Student Handbook (deck W80, W81; src 3087 to 3097). */
 
-export const HANDBOOK_PER_PAGE = 6;
-
 export type HandbookClass = 'all' | Severity;
 
 export function firstSanctionText(entry: Pick<HandbookEntryView, 'sanctions'>): string {

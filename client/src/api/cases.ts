@@ -15,6 +15,8 @@ export interface StaffCaseQuery {
   /** `status`: stage first, as "All cases" in the deck. */
   group?: 'status';
   page?: number;
+  /** Rows the list can show (the API clamps it to 3 to 50). */
+  pageSize?: number;
   /** Answer the page holding this case id (deep links). */
   focus?: number;
 }

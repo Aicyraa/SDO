@@ -2,7 +2,7 @@ import type { AppointmentStatus } from '@shared/types.js';
 import { isRealDate } from '../domain/appointments/window.js';
 import { invalid, valid, type Validated } from '../helpers/validation.js';
 import type { AppointmentRange } from '../repositories/appointments/queries.js';
-import { parseFocus, parsePage, parseSearchText, parseStudentId } from './common.validators.js';
+import { parseFocus, parsePage, parsePageSize, parseSearchText, parseStudentId } from './common.validators.js';
 
 const APPOINTMENT_STATUSES: readonly AppointmentStatus[] = ['scheduled', 'rescheduled', 'completed', 'cancelled'];
 
@@ -13,6 +13,7 @@ export interface AppointmentListInput {
   range: AppointmentRange | undefined;
   on: string | undefined;
   page: number;
+  pageSize: number | undefined;
   focus: number | undefined;
 }
 
@@ -23,6 +24,8 @@ export function parseAppointmentListQuery(query: Record<string, unknown>): Valid
   }
   const pageNumber = parsePage(page);
   if (!pageNumber.ok) return pageNumber;
+  const pageSize = parsePageSize(query.pageSize);
+  if (!pageSize.ok) return pageSize;
   const text = parseSearchText(q);
   if (!text.ok) return text;
   if (status !== undefined && !APPOINTMENT_STATUSES.includes(status as AppointmentStatus)) {
@@ -41,6 +44,7 @@ export function parseAppointmentListQuery(query: Record<string, unknown>): Valid
     range: range as AppointmentRange | undefined,
     on: typeof on === 'string' ? on : undefined,
     page: pageNumber.value,
+    pageSize: pageSize.value,
     focus: focusId.value,
   });
 }

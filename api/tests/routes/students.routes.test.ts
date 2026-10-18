@@ -100,6 +100,14 @@ describe('GET /me/profile', () => {
 });
 
 describe('GET /students', () => {
+  test('pageSize sets the rows per page, is clamped to 3 to 50, and refuses non-numbers', async () => {
+    const staff = await signedInAgent(build(), STAFF.email);
+    expect((await staff.get('/students?pageSize=10')).body.data).toMatchObject({ total: 2, pageSize: 10 });
+    expect((await staff.get('/students?pageSize=1')).body.data.pageSize).toBe(3);
+    expect((await staff.get('/students?pageSize=999')).body.data.pageSize).toBe(50);
+    expect((await staff.get('/students?pageSize=x')).status).toBe(400);
+  });
+
   test('staff list every student with open case and active sanction counts', async () => {
     const staff = await signedInAgent(build(), STAFF.email);
     const response = await staff.get('/students');

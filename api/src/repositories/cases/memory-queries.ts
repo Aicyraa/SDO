@@ -90,8 +90,9 @@ export function createMemoryCaseQueries(
         rows.map((row) => row.id),
         filter,
       );
-      const start = (page - 1) * CASE_PAGE_SIZE;
-      return { rows: rows.slice(start, start + CASE_PAGE_SIZE), total: rows.length, page, statusCounts };
+      const size = filter.pageSize ?? CASE_PAGE_SIZE;
+      const start = (page - 1) * size;
+      return { rows: rows.slice(start, start + size), total: rows.length, page, statusCounts };
     },
 
     async sanctionQueue({ filter, page, today }) {

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { meApi } from '@/api/me';
-import { CardBody as Body, DashboardCard, DateTile, EmptyLine, LinkRow, ProgressBar, RowBox, StatRow } from '@/components/dashboard/DashboardCards';
+import { CardBody as Body, DashboardCard, DateTile, EmptyLine, LinkRow, ProgressBar, RowList, StatRow } from '@/components/dashboard/DashboardCards';
 import { StatusPill } from '@/components/ui';
 import { StatTile } from '@/components/ui/StatTile';
 import { useApi } from '@/hooks/useApi';
@@ -46,7 +46,7 @@ export function StudentDashboard() {
       <Body resource={cases}>
         {({ cases: list }) => {
           const counts = caseCounts(list);
-          const rows = activeCases(list).slice(0, 5);
+          const rows = activeCases(list);
           return (
             <>
               <StatRow>
@@ -54,13 +54,13 @@ export function StudentDashboard() {
                 <StatTile label="Validated" value={counts.validated} />
                 <StatTile label="Sanction in progress" value={counts.sanctioned} />
               </StatRow>
-              <RowBox>
-                {rows.length === 0 ? <EmptyLine>No current violations on your record.</EmptyLine> : null}
-                {rows.map((c) => {
+              <RowList
+                empty={<EmptyLine>No current violations on your record.</EmptyLine>}
+                items={rows.map((c) => {
                   const row = violationRow(c);
                   return <LinkRow key={row.key} to={row.href} title={row.title} sub={row.sub} end={<StatusPill status={c.status} kind="case" />} />;
                 })}
-              </RowBox>
+              />
             </>
           );
         }}
@@ -120,7 +120,7 @@ export function StudentDashboard() {
       <Body resource={sanctions}>
         {({ sanctions: list }) => {
           const counts = sanctionCounts(list);
-          const open = list.filter((s) => s.status !== 'completed').slice(0, 3);
+          const open = list.filter((s) => s.status !== 'completed');
           return (
             <>
               <StatRow>
@@ -128,13 +128,13 @@ export function StudentDashboard() {
                 <StatTile label="Pending verification" value={counts.pendingVerification} />
                 <StatTile label="Cleared" value={counts.cleared} />
               </StatRow>
-              <RowBox>
-                {open.length === 0 ? <EmptyLine>No current sanctions.</EmptyLine> : null}
-                {open.map((s) => {
+              <RowList
+                empty={<EmptyLine>No current sanctions.</EmptyLine>}
+                items={open.map((s) => {
                   const row = sanctionRow(s);
                   return <LinkRow key={row.key} to={row.href} title={row.title} sub={row.sub} end={<StatusPill status={s.status} kind="sanction" />} />;
                 })}
-              </RowBox>
+              />
             </>
           );
         }}

@@ -11,6 +11,19 @@ export function parsePage(raw: unknown, message = 'page must be a positive whole
   return valid(Number(raw));
 }
 
+export const MIN_PAGE_SIZE = 3;
+export const MAX_PAGE_SIZE = 50;
+
+/**
+ * `?pageSize=`: how many rows the client can fit. Absent means "the list's default" (undefined); a whole number is
+ * clamped to 3 to 50; anything else is refused.
+ */
+export function parsePageSize(raw: unknown): Validated<number | undefined> {
+  if (raw === undefined) return valid(undefined);
+  if (typeof raw !== 'string' || !/^\d{1,4}$/.test(raw)) return invalid('pageSize must be a whole number.');
+  return valid(Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, Number(raw))));
+}
+
 /** `?q=`: text up to 100 characters, or absent. */
 export function parseSearchText(raw: unknown): Validated<string | undefined> {
   if (raw === undefined) return valid(undefined);

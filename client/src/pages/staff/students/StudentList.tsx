@@ -12,6 +12,7 @@ import { Pager } from '@/components/ui/Pager';
 import { casesApi } from '@/api/cases';
 import { studentsApi } from '@/api/students';
 import { useApi } from '@/hooks/useApi';
+import { useFitRows } from '@/hooks/useFitRows';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { cn } from '@/utils/cn';
 import { matchesStudent } from '@/utils/studentRecord';
@@ -29,7 +30,16 @@ export function StudentList({ selectedId, onFirstRow }: { selectedId: string | n
   const [page, setPage] = useState(1);
   // The API is asked once typing pauses; the rows already shown are still narrowed per key (matchesStudent below).
   const q = useDebouncedValue(query.trim());
-  const list = useApi(() => studentsApi.students({ q: q || undefined, page }), [q, page]);
+  const [total, setTotal] = useState<number | undefined>(undefined);
+  const { areaRef, rows: fitted } = useFitRows(total);
+  const list = useApi(() => studentsApi.students({ q: q || undefined, page, pageSize: fitted }), [q, page, fitted]);
+  const listTotal = list.status === 'ready' ? list.data.total : undefined;
+  useEffect(() => setTotal(listTotal), [listTotal]);
+  // A bigger window means fewer pages: step back when the page we were on no longer exists.
+  const lastPage = list.status === 'ready' ? Math.max(1, Math.ceil(list.data.total / list.data.pageSize)) : 1;
+  useEffect(() => {
+    if (list.status === 'ready' && page > lastPage) setPage(lastPage);
+  }, [list.status, page, lastPage]);
   // Sanctions waiting for verification, counted per student (the gold badge).
   const queue = useApi(() => casesApi.sanctionQueue({ filter: 'pending_verification' }), []);
   const toVerify = useMemo(() => {
@@ -75,7 +85,8 @@ export function StudentList({ selectedId, onFirstRow }: { selectedId: string | n
           className="gap-1.5 [&>button]:min-h-11 [&>button]:flex-1 [&>button]:justify-center [&>button]:px-3 [&>button]:text-xs rail:[&>button]:min-h-[34px]"
         />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
+      <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
         {list.status === 'loading' ? (
           <SkeletonList label="Loading students…" />
         ) : null}
@@ -86,6 +97,7 @@ export function StudentList({ selectedId, onFirstRow }: { selectedId: string | n
           const waiting = toVerify.get(row.studentId) ?? 0;
           return (
             <Link
+              data-fit-row
               key={row.studentId}
               to={`/students/${row.studentId}`}
               aria-current={selected ? 'true' : undefined}
@@ -118,6 +130,7 @@ export function StudentList({ selectedId, onFirstRow }: { selectedId: string | n
           className="mt-auto border-t border-line-soft py-2.5"
         />
       ) : null}
+      </div>
     </ListCard>
   );
 }

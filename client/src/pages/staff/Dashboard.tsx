@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { appointmentsApi } from '@/api/appointments';
 import { casesApi } from '@/api/cases';
 import { clearanceApi } from '@/api/clearance';
-import { ACTION_PILL, AllClear, CardBody as Body, DashRow, DashboardCard, Flag, RowBox, StatRow } from '@/components/dashboard/DashboardCards';
+import { ACTION_PILL, AllClear, CardBody as Body, DashRow, DashboardCard, Flag, RowList, StatRow } from '@/components/dashboard/DashboardCards';
 import { Spinner } from '@/components/feedback/PageState';
 import { useToast } from '@/components/feedback';
 import { Icon } from '@/components/ui/Icon';
@@ -20,15 +20,18 @@ function WillEscalate({ submissionRef }: { submissionRef: string }) {
   return <Flag>Will escalate</Flag>;
 }
 
+/** Rows each card asks for; a card shows as many as its box holds (RowList), and "View all" covers the rest. */
+const CARD_ROWS = 12;
+
 const count = (value: number, one: string, many: string) => `${value} ${value === 1 ? one : many}`;
 
 /** Staff dashboard (deck W15, M15, M16; src 425 to 541). No page header: the breadcrumb is the title. */
 export function StaffHome() {
   const toast = useToast();
   const today = manilaToday();
-  const reported = useApi(() => casesApi.staffCases({ status: 'reported', sort: 'oldest' }), []);
-  const validated = useApi(() => casesApi.staffCases({ status: 'validated', sort: 'oldest' }), []);
-  const appointments = useApi(() => appointmentsApi.staffAppointments({ bucket: 'upcoming' }), []);
+  const reported = useApi(() => casesApi.staffCases({ status: 'reported', sort: 'oldest', pageSize: CARD_ROWS }), []);
+  const validated = useApi(() => casesApi.staffCases({ status: 'validated', sort: 'oldest', pageSize: CARD_ROWS }), []);
+  const appointments = useApi(() => appointmentsApi.staffAppointments({ bucket: 'upcoming', pageSize: CARD_ROWS }), []);
   const queue = useApi(() => casesApi.sanctionQueue({ filter: 'active' }), []);
   const roster = useApi(async () => {
     const { current } = await clearanceApi.clearanceTerms();
@@ -88,11 +91,11 @@ export function StaffHome() {
       </StatRow>
       <Body resource={reported}>
         {({ cases }) => {
-          const rows = reportRows(cases, today).slice(0, 3);
+          const rows = reportRows(cases, today);
           return (
-            <RowBox>
-              {rows.length === 0 ? <AllClear>No reports waiting.</AllClear> : null}
-              {rows.map((row) => (
+            <RowList
+              empty={<AllClear>No reports waiting.</AllClear>}
+              items={rows.map((row) => (
                 <DashRow
                   key={row.key}
                   title={row.title}
@@ -105,7 +108,7 @@ export function StaffHome() {
                   }
                 />
               ))}
-            </RowBox>
+            />
           );
         }}
       </Body>
@@ -123,9 +126,9 @@ export function StaffHome() {
     >
       <Body resource={validated}>
         {({ cases }) => (
-          <RowBox>
-            {cases.length === 0 ? <AllClear>No cases awaiting a decision.</AllClear> : null}
-            {cases.slice(0, 3).map((caseRow) => {
+          <RowList
+            empty={<AllClear>No cases awaiting a decision.</AllClear>}
+            items={cases.map((caseRow) => {
               const row = decisionRow(caseRow, today);
               return (
                 <DashRow
@@ -141,7 +144,7 @@ export function StaffHome() {
                 />
               );
             })}
-          </RowBox>
+          />
         )}
       </Body>
     </DashboardCard>
@@ -159,9 +162,9 @@ export function StaffHome() {
     >
       <Body resource={appointments}>
         {({ appointments: list }) => (
-          <RowBox>
-            {list.length === 0 ? <AllClear>No upcoming appointments.</AllClear> : null}
-            {list.slice(0, 3).map((appointment) => {
+          <RowList
+            empty={<AllClear>No upcoming appointments.</AllClear>}
+            items={list.map((appointment) => {
               const row = appointmentRow(appointment, today);
               return (
                 <DashRow
@@ -177,7 +180,7 @@ export function StaffHome() {
                 />
               );
             })}
-          </RowBox>
+          />
         )}
       </Body>
     </DashboardCard>
@@ -204,24 +207,22 @@ export function StaffHome() {
               <StatTile label="Overdue" value={counts.overdue} tone={counts.overdue > 0 ? 'danger' : 'default'} />
               <StatTile label="To verify" value={counts.pendingVerification} />
             </StatRow>
-            <RowBox>
-              {sanctions.length === 0 ? <AllClear>No sanctions need attention.</AllClear> : null}
-              {sanctionRows(sanctions)
-                .slice(0, 3)
-                .map((row) => (
-                  <DashRow
-                    key={row.key}
-                    title={row.title}
-                    sub={row.sub}
-                    flag={row.flag ? <Flag>{row.flag}</Flag> : null}
-                    action={
-                      <Link to={row.href} className={ACTION_PILL}>
-                        {row.action}
-                      </Link>
-                    }
-                  />
-                ))}
-            </RowBox>
+            <RowList
+              empty={<AllClear>No sanctions need attention.</AllClear>}
+              items={sanctionRows(sanctions).map((row) => (
+                <DashRow
+                  key={row.key}
+                  title={row.title}
+                  sub={row.sub}
+                  flag={row.flag ? <Flag>{row.flag}</Flag> : null}
+                  action={
+                    <Link to={row.href} className={ACTION_PILL}>
+                      {row.action}
+                    </Link>
+                  }
+                />
+              ))}
+            />
           </>
         )}
       </Body>
@@ -245,11 +246,11 @@ export function StaffHome() {
     >
       <Body resource={roster}>
         {({ term, data }) => {
-          const rows = clearanceRows(data.students, term).slice(0, 3);
+          const rows = clearanceRows(data.students, term);
           return (
-            <RowBox>
-              {rows.length === 0 ? <AllClear>Every student is cleared this term.</AllClear> : null}
-              {rows.map((row) => (
+            <RowList
+              empty={<AllClear>Every student is cleared this term.</AllClear>}
+              items={rows.map((row) => (
                 <DashRow
                   key={row.key}
                   title={row.title}
@@ -262,7 +263,7 @@ export function StaffHome() {
                   }
                 />
               ))}
-            </RowBox>
+            />
           );
         }}
       </Body>

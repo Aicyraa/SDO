@@ -7,16 +7,18 @@ import { ListCard } from '@/components/ui/ListCard';
 import { Pager } from '@/components/ui/Pager';
 import { cn } from '@/utils/cn';
 import { violationTitle } from '@/utils/format';
-import { HANDBOOK_PER_PAGE, firstSanctionText } from '@/utils/handbook';
+import { firstSanctionText } from '@/utils/handbook';
 
 const COLUMNS = 'rail:grid rail:grid-cols-[minmax(0,1.6fr)_84px_84px_minmax(0,1.2fr)] rail:gap-3';
 
-/** The handbook table (deck src 1759 to 1801): search, Violation / Category / Section / Sanction, 6 per page. */
+/** The handbook table (deck src 1759 to 1801): search, Violation / Category / Section / Sanction, as many per page as fit (F1). */
 export function HandbookTable({
   rows,
   query,
   onQuery,
   page,
+  perPage,
+  areaRef,
   onPage,
   selectedId,
 }: {
@@ -24,10 +26,13 @@ export function HandbookTable({
   query: string;
   onQuery: (value: string) => void;
   page: number;
+  /** Rows per page, measured by the page's `useFitRows`. */
+  perPage: number;
+  areaRef: (element: HTMLDivElement | null) => void;
   onPage: (page: number) => void;
   selectedId: number | null;
 }) {
-  const shown = rows.slice((page - 1) * HANDBOOK_PER_PAGE, page * HANDBOOK_PER_PAGE);
+  const shown = rows.slice((page - 1) * perPage, page * perPage);
   return (
     <ListCard className="flex min-h-0 flex-1 flex-col">
       <div className="border-b border-line-soft p-4">
@@ -49,12 +54,14 @@ export function HandbookTable({
         <span>Section</span>
         <span>Sanction</span>
       </div>
-      <div className="min-h-0 flex-1">
+      <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
+      <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
         {shown.length === 0 ? <p className="px-5 py-8 text-center text-[13px] text-muted">No handbook entry matches your search.</p> : null}
         {shown.map((entry) => {
           const selected = entry.id === selectedId;
           return (
             <Link
+              data-fit-row
               key={entry.id}
               to={`/handbook/${entry.id}`}
               state={{ fromList: true }}
@@ -80,7 +87,8 @@ export function HandbookTable({
           );
         })}
       </div>
-      <Pager page={page} pageCount={Math.max(1, Math.ceil(rows.length / HANDBOOK_PER_PAGE))} onChange={onPage} className="mt-auto border-t border-line-soft py-2.5" />
+      <Pager page={page} pageCount={Math.max(1, Math.ceil(rows.length / perPage))} onChange={onPage} className="mt-auto border-t border-line-soft py-2.5" />
+      </div>
     </ListCard>
   );
 }

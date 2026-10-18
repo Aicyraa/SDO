@@ -10,6 +10,8 @@ export const appointmentsApi = {
     range?: string;
     on?: string;
     page?: number;
+    /** Rows the list can show (the API clamps it to 3 to 50). */
+    pageSize?: number;
     focus?: number;
   }) => {
     const params: Record<string, string | number> = {};

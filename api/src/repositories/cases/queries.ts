@@ -37,6 +37,8 @@ export interface CaseListFilter {
   group?: 'status';
   /** 1-based. */
   page: number;
+  /** Rows per page; `CASE_PAGE_SIZE` when absent. */
+  pageSize?: number;
   /** Answer the page that holds this case instead of `page` (dashboard deep links); ignored when no match holds it. */
   focus?: number;
 }
@@ -61,10 +63,10 @@ export function compareCases(filter: Pick<CaseListFilter, 'sort' | 'group'>): (a
 }
 
 /** The page to answer: the one holding `focus` when the ordered matches contain it, else the asked page. */
-export function pageFor(orderedIds: readonly number[], filter: Pick<CaseListFilter, 'page' | 'focus'>): number {
+export function pageFor(orderedIds: readonly number[], filter: Pick<CaseListFilter, 'page' | 'focus' | 'pageSize'>): number {
   if (filter.focus === undefined) return filter.page;
   const index = orderedIds.indexOf(filter.focus);
-  return index < 0 ? filter.page : Math.floor(index / CASE_PAGE_SIZE) + 1;
+  return index < 0 ? filter.page : Math.floor(index / (filter.pageSize ?? CASE_PAGE_SIZE)) + 1;
 }
 
 /** Read side of the staff case screens. Writes go through the CaseService. */
