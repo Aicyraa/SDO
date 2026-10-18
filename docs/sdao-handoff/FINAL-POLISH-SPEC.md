@@ -224,3 +224,24 @@ In `pages/student/handbook/HandbookEntry.tsx` (`PostedTemplate`):
 - **HUMAN CHECK** (dev database):
   - Sign in as staff, open Sanction templates, choose Add sanction, enter a new name -> it appears in the list with the next `S-0xx` code and can take a template upload.
   - Open a student, click the Clearance tile, record a requirement -> the student's bell shows "Clearance requirement done".
+
+## 7. Build log (2026-10-18, branch `worktree-system-final-polish`)
+
+All twelve slices are built. Where the build differs from the text above, this section wins.
+
+| Slice | Done | Differences from the plan |
+|---|---|---|
+| F1 | Staff Cases, Appointments, Students; Inbox; student Violations and Handbook; Notices; staff and student dashboards | Row heights are **measured** from the first real row (`data-fit-row`), not fixed, so rows keep exactly their old size. `useFitRows` measures the box holding the body and the pager strip, trims rows if a measured overflow remains (group heads), and keeps the last known total so the page size cannot flip back and forth. `pageSize` is on `/cases`, `/appointments` and `/students`; the clearance roster did not need it (the staff roster list is gone, F6). Student Sanctions, Sanction templates, staff Violations and the bell popover are plain scroll lists with no pager and were left as they are. Dashboards use `RowList`: each card asks for 12 rows and shows as many as its box holds (never fewer than 3). |
+| F2 | `MasterDetail` | The pane is clipped (`overflow-hidden`) and the card inside is capped at the pane height and scrolls its own content. The header scrolls with the content rather than staying pinned. |
+| F3 | Notices | As planned. Row state is an icon with a tooltip (Active, Expired); the list pages with `useFitRows`. |
+| F4 | Template file row | `FileRow` has `actions: 'pill' or 'icon'`; icon buttons come from the new `IconButton` (round, tooltip). |
+| F5 | Staff nav | Also reordered the phone tab bar: Home, Students, Cases, Schedule. |
+| F6 | Clearance in the student record | As planned. Old `/clearance` addresses redirect for staff. |
+| F7 | Add sanction | **The endpoint is `POST /sanction-templates`**, not `POST /sanctions` (that path belongs to a student's case sanctions). Error code `sanction_exists` (409). |
+| F8 | Tooltips | `TooltipBubble` (portal, flips, clamps) is shared by `IconHint` and `IconButton`; `utils/anchor.ts` is the placement math. |
+| F9, F10, F11 | As planned | The Inbox row was already centred, so only the bell row changed. |
+| F12 | Student template block | **The note icon is per template**, beside its title (also when no file is posted), not in the block header. |
+
+**SPEC CHANGE (for the human):** add `POST /sanction-templates` (staff; body `{ sanctionType, description }`; 201 with the new template; 409 `sanction_exists`) and the optional `pageSize` query (3 to 50) on `GET /cases`, `/appointments` and `/students` to SPEC 7; remove the staff Clearance page from SPEC 5 and add the Clearance section of the student record.
+
+**HUMAN CHECK** (needs the real database, not run here): sign in as staff and add a sanction; open a student and record a clearance requirement; resize the window and watch the lists change their row count. Layout was checked in a browser against a mocked API at 1366x768 for Cases, Notices, Sanction templates, the student record and the staff dashboard. The student pages, the phone and mid widths were not checked live.
