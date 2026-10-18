@@ -30,6 +30,13 @@ export function fileMeta(file: { name: string; sizeBytes: number; dateUploaded?:
   return parts.join(' · ');
 }
 
+/** "Posted Oct 16, 2026" (Asia/Manila), the only line a template row needs; empty when the date is unknown. */
+export function postedOn(file: { dateUploaded?: string | null }, verb = 'Posted'): string {
+  if (!file.dateUploaded) return '';
+  const when = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(file.dateUploaded));
+  return `${verb} ${when}`;
+}
+
 /** Deck src 2473: while the SDO reviews, the last submitted file can only be replaced, not removed. */
 export function lastFileRemovalMessage(status: string, fileCount: number): string | null {
   return status === 'pending_verification' && fileCount <= 1

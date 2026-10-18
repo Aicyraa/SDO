@@ -3,10 +3,11 @@ import type { HandbookEntryView, SanctionTemplateView } from '@shared/types';
 import { FilePreview, downloadFile } from '@/components/feedback/FilePreview';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { Popover } from '@/components/ui/Popover';
 import { ApiError } from '@/api/client';
 import { templatesApi } from '@/api/templates';
 import { useToast } from '@/components/feedback';
-import { fileMeta } from '@/utils/files';
+import { fileMeta, postedOn } from '@/utils/files';
 import { violationTitle } from '@/utils/format';
 import { ladder, postedTemplates } from '@/utils/handbook';
 
@@ -30,9 +31,20 @@ function PostedTemplate({ template }: { template: SanctionTemplateView }) {
     }
   }
 
+  const note = template.requirements ? (
+    <Popover icon="sticky_note_2" label={`Instructions for ${template.type}`} title="Instructions from the SDO">
+      {template.requirements}
+    </Popover>
+  ) : null;
+
   return (
     <div className="flex flex-col gap-3 border-b border-line-soft pb-3.5 last:border-b-0 last:pb-0">
-      <p className="text-xs font-bold tracking-[0.04em] text-info-ink uppercase">{template.type}</p>
+      {file ? null : (
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-bold tracking-[0.04em] text-info-ink uppercase">{template.type}</p>
+          {note}
+        </div>
+      )}
       {file ? (
         <>
           <div className="flex items-start gap-3">
@@ -42,8 +54,9 @@ function PostedTemplate({ template }: { template: SanctionTemplateView }) {
             <div className="min-w-0 flex-1 leading-snug">
               <p className="text-[15px] font-bold text-ink">{template.title || file.name}</p>
               {template.description ? <p className="mt-0.5 text-sm text-pretty text-body">{template.description}</p> : null}
-              <p className="mt-1 text-xs text-muted">{fileMeta(file, 'Posted')}</p>
+              <p className="mt-1 text-xs text-muted">{postedOn(file)}</p>
             </div>
+            {note}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="lg" className="flex-[1_1_140px]" onClick={() => setPreviewing(true)}>
@@ -56,12 +69,6 @@ function PostedTemplate({ template }: { template: SanctionTemplateView }) {
             </Button>
           </div>
         </>
-      ) : null}
-      {template.requirements ? (
-        <div>
-          <p className="mb-1 text-[13px] font-semibold text-muted">What to prepare</p>
-          <p className="text-sm whitespace-pre-line text-pretty text-body">{template.requirements}</p>
-        </div>
       ) : null}
       {previewing && file ? (
         <FilePreview file={{ name: file.name, meta: fileMeta(file, 'Posted') }} loadUrl={async () => (await templatesApi.templateFileUrl(file.id)).url} onClose={() => setPreviewing(false)} />

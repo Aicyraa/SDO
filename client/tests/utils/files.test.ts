@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ACCEPT_ATTRIBUTE, MAX_FILE_BYTES, addDays, formatSize, manilaToday, progressPercent, uploadButtonLabel } from '@/utils/files';
+import { ACCEPT_ATTRIBUTE, MAX_FILE_BYTES, addDays, formatSize, manilaToday, postedOn, progressPercent, uploadButtonLabel } from '@/utils/files';
 import { checkSelection, splitSelection } from '@/validators/files';
 
 const file = (name: string, size = 1024) => ({ name, size });
@@ -111,5 +111,16 @@ describe('uploadButtonLabel', () => {
     expect(uploadButtonLabel({ count: 2, busy: true, percent: null })).toBe('Uploading…');
     expect(uploadButtonLabel({ count: 2, busy: true, percent: 40 })).toBe('Uploading… 40%');
     expect(uploadButtonLabel({ count: 2, busy: true, percent: 100 })).toBe('Processing…');
+  });
+});
+
+describe('postedOn', () => {
+  test('is the Manila date only, with no type or size', () => {
+    expect(postedOn({ dateUploaded: '2026-10-16T01:28:00Z' })).toBe('Posted Oct 16, 2026');
+    expect(postedOn({ dateUploaded: '2026-10-16T17:00:00Z' })).toBe('Posted Oct 17, 2026');
+  });
+
+  test('is empty when the date is unknown', () => {
+    expect(postedOn({})).toBe('');
   });
 });

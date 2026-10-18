@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { toApiError } from '@/api/client';
 import { templatesApi } from '@/api/templates';
 import { cn } from '@/utils/cn';
-import { ACCEPT_ATTRIBUTE, fileMeta } from '@/utils/files';
+import { ACCEPT_ATTRIBUTE, fileMeta, postedOn } from '@/utils/files';
 import { checkSelection } from '@/validators/files';
 import { templateToasts } from '@/utils/templates';
 
@@ -96,7 +96,6 @@ export function TemplateEditor({ template, meta, onChanged }: { template: Sancti
         </div>
         <div className="flex flex-col gap-4 p-4">
           <div>
-            <p className="mb-2 text-[13px] font-semibold text-ink">Template file</p>
             <input
               ref={pickRef}
               id={`tpl-file-${template.sanctionId}`}
@@ -111,11 +110,12 @@ export function TemplateEditor({ template, meta, onChanged }: { template: Sancti
             {current ? (
               <FileRow
                 name={current.name}
-                meta={fileMeta(current, 'Posted')}
+                meta={postedOn(current)}
+                actions="icon"
                 onView={() => setPreviewing(true)}
                 onReplace={uploading ? undefined : () => pickRef.current?.click()}
                 onRemove={uploading ? undefined : () => setRemoving(true)}
-                className="bg-surface-2 [&>div:last-child]:w-full [&>div:last-child]:flex-wrap [&>div:last-child]:justify-end [&_.truncate]:break-words [&_.truncate]:whitespace-normal"
+                className="flex-nowrap bg-surface-2 [&_.truncate]:break-words [&_.truncate]:whitespace-normal"
               />
             ) : (
               <label
