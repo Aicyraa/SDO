@@ -59,8 +59,8 @@ describe('navGroups destinations', () => {
     expect(paths('staff')).toEqual([
       '/',
       '/inbox',
-      '/cases',
       '/students',
+      '/cases',
       '/notices',
       '/appointments',
       '/clearance',

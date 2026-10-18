@@ -64,8 +64,8 @@ const STAFF_GROUPS: NavGroup[] = [
   {
     label: 'Manage',
     items: [
-      { to: '/cases', label: 'Cases', icon: 'gavel', badge: 'cases' },
       { to: '/students', label: 'Students', icon: 'school', badge: 'students' },
+      { to: '/cases', label: 'Cases', icon: 'gavel', badge: 'cases' },
       { to: '/notices', label: 'Notices', icon: 'campaign' },
       { to: '/appointments', label: 'Appointments', short: 'Schedule', icon: 'calendar_month', end: true },
       { to: '/clearance', label: 'Clearance', icon: 'task_alt' },
@@ -95,7 +95,7 @@ export function phoneTabs(role: AccountRole): NavItem[] {
     throw new Error(`Unknown nav target ${to}`);
   };
   return role === 'staff'
-    ? [find('/'), find('/cases'), find('/students'), find('/appointments')]
+    ? [find('/'), find('/students'), find('/cases'), find('/appointments')]
     : [find('/'), find('/violations'), find('/sanctions'), find('/appointments')];
 }
 
