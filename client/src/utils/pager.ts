@@ -27,8 +27,8 @@ export const MIN_FIT_ROWS = 3;
 export const MAX_FIT_ROWS = 50;
 /** Rows per page on screens whose list is not height-bound (phones and stacked panes: the page itself scrolls). */
 export const STACKED_ROWS = 10;
-/** Height of the pager strip under a list (`Pager` with `py-2.5` plus its top border), in layout pixels. */
-export const PAGER_HEIGHT = 61;
+/** Height of the pager strip under a list (`Pager` with `py-2.5` and 34 px buttons, plus its top border), in layout pixels. */
+export const PAGER_HEIGHT = 55;
 
 /**
  * How many rows a list area can show (FINAL-POLISH-SPEC F1). `areaHeight` is the list body plus the strip the pager

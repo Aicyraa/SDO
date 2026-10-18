@@ -71,7 +71,7 @@ export function MasterDetail({ list, detail, emptyDetail, ratio = 'even', backTo
   const fill = '@min-[800px]:[&>*]:max-h-full @min-[800px]:[&>*]:overflow-y-auto';
   const open = detail !== null;
   return (
-    <div ref={containerRef} className="@container">
+    <div ref={containerRef} data-master-detail className="@container">
       <div className={cn('grid gap-6', RATIOS[ratio])}>
         <div className={cn(pane, fill, open && 'hidden @min-[800px]:block')}>{list}</div>
         {open ? (

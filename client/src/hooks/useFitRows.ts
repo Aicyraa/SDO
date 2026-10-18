@@ -33,7 +33,7 @@ export function useFitRows(total?: number): { areaRef: (element: HTMLDivElement 
     if (!area) return;
     const firstRow = area.querySelector<HTMLElement>('[data-fit-row]');
     if (firstRow && firstRow.offsetHeight > 0) rowHeight.current = firstRow.offsetHeight;
-    const host = area.closest<HTMLElement>('.\\@container');
+    const host = area.closest<HTMLElement>('[data-master-detail]');
     const fixed = host ? host.clientWidth >= PANES_SIDE_BY_SIDE : window.innerWidth >= RAIL_WIDTH;
     setMeasured((previous) => {
       const next = { area: area.clientHeight, row: rowHeight.current, fixed };
