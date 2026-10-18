@@ -1,12 +1,15 @@
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageError } from '@/components/feedback/PageState';
 import { SkeletonList } from '@/components/feedback/Skeleton';
 import { MasterDetail } from '@/components/layout/MasterDetail';
+import { usePageAction } from '@/components/layout/PageAction';
 import { EmptyBlock } from '@/components/ui/EmptyBlock';
 import { handbookApi } from '@/api/handbook';
 import { templatesApi } from '@/api/templates';
 import { useApi } from '@/hooks/useApi';
 import { categoryMeta, sanctionCategories } from '@/utils/templates';
+import { AddSanctionModal } from './templates/AddSanctionModal';
 import { TemplateEditor } from './templates/TemplateEditor';
 import { TemplateList } from './templates/TemplateList';
 
@@ -17,6 +20,9 @@ export function SanctionTemplatesPage() {
   // The violations say which category a sanction belongs to (sanctions carry none).
   const handbook = useApi(() => handbookApi.handbook(), []);
   const selectedId = /^\d+$/.test(id ?? '') ? Number(id) : null;
+  const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
+  usePageAction('Add sanction', 'add', () => setAdding(true));
 
   if (templates.status === 'loading' || handbook.status === 'loading') {
     return (
@@ -52,6 +58,17 @@ export function SanctionTemplatesPage() {
         detail={selectedId === null ? null : editor}
         emptyDetail={editor}
       />
+      {adding ? (
+        <AddSanctionModal
+          existingNames={list.map((t) => t.type)}
+          onClose={() => setAdding(false)}
+          onAdded={(sanctionId) => {
+            setAdding(false);
+            templates.reload();
+            navigate(`/sanction-templates/${sanctionId}`);
+          }}
+        />
+      ) : null}
     </>
   );
 }

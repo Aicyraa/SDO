@@ -1,9 +1,10 @@
 import type { SanctionTemplateView } from '@shared/types';
 import { progressPercent } from '@/utils/files';
-import { get, del, request, http } from './client';
+import { get, del, post, request, http } from './client';
 
 export const templatesApi = {
   sanctionTemplates: () => get<{ templates: SanctionTemplateView[] }>('/sanction-templates'),
+  createSanction: (input: { sanctionType: string; description: string }) => post<{ template: SanctionTemplateView }>('/sanction-templates', input),
   saveTemplateText: (sanctionId: number, input: { title: string; description: string; requirements: string }) =>
     request<{ ok: true }>(() => http.put(`/sanction-templates/${sanctionId}`, input)),
   uploadTemplateFiles: (sanctionId: number, files: File[], onProgress?: (percent: number) => void) => {

@@ -31,6 +31,10 @@ export interface TemplateFileLookup {
 /** Everything the template workflow reads and writes, scoped to one database transaction. */
 export interface TemplateTx {
   getSanction(sanctionId: number): Promise<{ sanctionId: number; sanctionType: string } | null>;
+  /** The sanction with this name, ignoring case, or null. */
+  findSanctionByType(sanctionType: string): Promise<{ sanctionId: number } | null>;
+  /** Adds a sanction (no template yet) and returns its id. */
+  insertSanction(input: { sanctionType: string; description: string }): Promise<number>;
   /** The sanction's template with its files, or a record with `templateId: null` when none exists yet. */
   getTemplate(sanctionId: number): Promise<TemplateRecord | null>;
   /** Creates the template row if it is missing, then sets the text. Returns the template id. */

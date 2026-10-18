@@ -52,6 +52,7 @@ export type ApiErrorCode =
   | 'appointment_overlap'
   // handbook admin
   | 'violation_exists'
+  | 'sanction_exists'
   | 'violation_in_use'
   // clearance
   | 'clearance_exists'

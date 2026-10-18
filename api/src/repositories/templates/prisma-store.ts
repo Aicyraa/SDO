@@ -68,6 +68,17 @@ function createTx(db: Prisma.TransactionClient): TemplateTx {
       const row = await db.sanctions.findUnique({ where: { sanction_id: sanctionId }, select: { sanction_id: true, sanction_type: true } });
       return row ? { sanctionId: row.sanction_id, sanctionType: row.sanction_type } : null;
     },
+    async findSanctionByType(sanctionType) {
+      const row = await db.sanctions.findFirst({
+        where: { sanction_type: { equals: sanctionType, mode: 'insensitive' } },
+        select: { sanction_id: true },
+      });
+      return row ? { sanctionId: row.sanction_id } : null;
+    },
+    async insertSanction({ sanctionType, description }) {
+      const row = await db.sanctions.create({ data: { sanction_type: sanctionType, description }, select: { sanction_id: true } });
+      return row.sanction_id;
+    },
     async getTemplate(sanctionId) {
       const row = await db.sanctions.findUnique({ where: { sanction_id: sanctionId }, include });
       return row ? toRecord(row as unknown as SanctionRow) : null;

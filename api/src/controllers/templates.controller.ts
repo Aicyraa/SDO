@@ -19,6 +19,7 @@ const HTTP_STATUS: Record<TemplateFailureCode, number> = {
   too_many_files: 400,
   too_large: 413,
   not_found: 404,
+  sanction_exists: 409,
 };
 
 /**
@@ -37,6 +38,15 @@ export function createTemplateController({ service, reader }: TemplateController
     const result = await service.downloadUrl({ fileId });
     if (!result.ok) return sendFailure(response, result, HTTP_STATUS);
     sendOk(response, { url: result.url, expiresInSeconds: result.expiresInSeconds });
+  };
+
+  const create: RequestHandler = async (request, response) => {
+    const { sanctionType, description } = request.body ?? {};
+    const result = await service.createSanction({ sanctionType, description });
+    if (!result.ok) return sendFailure(response, result, HTTP_STATUS);
+    const created = (await reader.list()).find((record) => record.sanctionId === result.sanctionId);
+    if (!created) return sendNotFound(response);
+    sendOk(response, { template: toTemplateView(created) }, 201);
   };
 
   const saveText: RequestHandler = async (request, response) => {
@@ -74,5 +84,5 @@ export function createTemplateController({ service, reader }: TemplateController
     sendOk(response, { ok: true });
   };
 
-  return { list, fileUrl, saveText, uploadFiles, removeFile };
+  return { list, fileUrl, create, saveText, uploadFiles, removeFile };
 }
