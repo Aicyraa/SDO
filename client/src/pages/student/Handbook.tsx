@@ -9,6 +9,7 @@ import { handbookApi } from '@/api/handbook';
 import { templatesApi } from '@/api/templates';
 import { useApi } from '@/hooks/useApi';
 import { useFitRows } from '@/hooks/useFitRows';
+import { hiddenByFilters } from '@/utils/studentView';
 import { filterHandbook, handbookTiles, type HandbookClass } from '@/utils/handbook';
 import { HandbookEntry } from './handbook/HandbookEntry';
 import { HandbookTable } from './handbook/HandbookTable';
@@ -52,7 +53,9 @@ export function StudentHandbookPage() {
   if (handbook.status === 'error') return <PageError page="the Student Handbook" detail={handbook.error.message} onRetry={handbook.reload} />;
 
   const list = templates.status === 'ready' ? templates.data.templates : [];
-  const current = selectedId === null ? rows[(page - 1) * perPage] : entries.find((e) => e.id === selectedId);
+  // A selected entry the search or category hides is not shown beside a list that no longer holds it.
+  const hidden = hiddenByFilters(selectedId, entries, rows);
+  const current = selectedId === null || hidden ? rows[(page - 1) * perPage] : entries.find((e) => e.id === selectedId);
   const pane = current ? (
     <HandbookEntry key={current.id} entry={current} templates={list} />
   ) : selectedId !== null && !hidden ? (

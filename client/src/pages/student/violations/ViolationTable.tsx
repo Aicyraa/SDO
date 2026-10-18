@@ -44,7 +44,7 @@ export function ViolationTable({
       </div>
       <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
       <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
-        {shown.length === 0 ? <p className="px-4 py-5 text-center text-[13px] text-muted">No violations match these filters.</p> : null}
+        {shown.length === 0 ? <p className="px-4 py-5 text-center text-[13px] text-muted">{emptyText}</p> : null}
         {shown.map((row) => {
           const tag = caseTag(row);
           const selected = row.id === selectedId;

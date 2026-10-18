@@ -9,7 +9,7 @@ import { ChipGroup } from '@/components/ui/ChipGroup';
 import { meApi } from '@/api/me';
 import { useApi } from '@/hooks/useApi';
 import { useFitRows } from '@/hooks/useFitRows';
-import { classTiles, statusChips, violationBase, type CaseStatusKey, type ClassKey } from '@/utils/studentView';
+import { classTiles, hiddenByFilters, statusChips, violationBase, type CaseStatusKey, type ClassKey } from '@/utils/studentView';
 import { ViolationDetail } from './violations/ViolationDetail';
 import { ViolationTable } from './violations/ViolationTable';
 
@@ -61,6 +61,8 @@ export function ViolationsPage() {
 
   const resetPage = () => setPage(1);
   const first = rows[(page - 1) * perPage]?.id ?? null;
+  // A selected case the filters hide is not shown beside a list that no longer holds it.
+  const hidden = hiddenByFilters(caseId, cases, rows);
   const pane = (shownId: number) => <ViolationDetail key={shownId} caseId={shownId} />;
 
   return (

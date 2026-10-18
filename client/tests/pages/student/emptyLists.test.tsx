@@ -16,13 +16,13 @@ describe('an empty student list says one thing, once', () => {
   });
 
   test('violations: the table gives the message the page chooses', () => {
-    const props = { rows: [], page: 1, onPage: () => undefined, selectedId: null, resolvedCount: 0, showResolved: false, onToggleResolved: () => undefined };
+    const props = { rows: [], page: 1, perPage: 5, areaRef: () => undefined, onPage: () => undefined, selectedId: null, resolvedCount: 0, showResolved: false, onToggleResolved: () => undefined };
     expect(inRouter(<ViolationTable {...props} />)).toContain('No violations match these filters.');
     expect(inRouter(<ViolationTable {...props} emptyText="You have no violations on record." />)).toContain('You have no violations on record.');
   });
 
   test('handbook: a search with no match shows its one message in the list', () => {
-    const html = inRouter(<HandbookTable rows={[]} query="zzz" onQuery={() => undefined} page={1} onPage={() => undefined} selectedId={null} />);
+    const html = inRouter(<HandbookTable rows={[]} query="zzz" onQuery={() => undefined} page={1} perPage={5} areaRef={() => undefined} onPage={() => undefined} selectedId={null} />);
     expect(html).toContain('No handbook entry matches your search.');
     expect(html).not.toContain('No handbook entry selected.');
   });
@@ -38,7 +38,7 @@ describe('handbook table semantics', () => {
   } as unknown as Parameters<typeof HandbookTable>[0]['rows'][number];
 
   test('the header and rows are a real table structure', () => {
-    const html = inRouter(<HandbookTable rows={[entry]} query="" onQuery={() => undefined} page={1} onPage={() => undefined} selectedId={null} />);
+    const html = inRouter(<HandbookTable rows={[entry]} query="" onQuery={() => undefined} page={1} perPage={5} areaRef={() => undefined} onPage={() => undefined} selectedId={null} />);
     expect(html).toContain('role="table"');
     expect(html).toContain('role="rowgroup"');
     expect((html.match(/role="columnheader"/g) ?? []).length).toBe(4);
@@ -48,6 +48,6 @@ describe('handbook table semantics', () => {
 });
 
 test('the handbook search placeholder is short enough for a 320 px screen', () => {
-  const html = inRouter(<HandbookTable rows={[]} query="" onQuery={() => undefined} page={1} onPage={() => undefined} selectedId={null} />);
+  const html = inRouter(<HandbookTable rows={[]} query="" onQuery={() => undefined} page={1} perPage={5} areaRef={() => undefined} onPage={() => undefined} selectedId={null} />);
   expect(html).toContain('placeholder="Search handbook"');
 });
