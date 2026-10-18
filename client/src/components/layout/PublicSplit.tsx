@@ -62,7 +62,7 @@ export function PublicSplit({ children }: { children: ReactNode }) {
           </p>
         </div>
 
-        <ul className="relative flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 text-sm text-white/90 backdrop-blur-sm">
+        <ul className="relative hidden flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 text-sm text-white/90 backdrop-blur-sm full:flex">
           {PLACES.map((place) => (
             <li key={place.icon} className="flex items-center gap-3">
               <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-gold/20 text-gold">
