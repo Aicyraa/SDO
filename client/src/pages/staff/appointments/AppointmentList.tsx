@@ -97,7 +97,10 @@ export function AppointmentList({
     [q, status, range, on, page, fitted, page === null ? selectedId : null],
   );
   const listTotal = resource.status === 'ready' ? resource.data.total : undefined;
-  useEffect(() => setTotal(listTotal), [listTotal]);
+  // Keep the last known total while the next page loads: a total that vanished would change the page size and refetch for ever.
+  useEffect(() => {
+    if (listTotal !== undefined) setTotal(listTotal);
+  }, [listTotal]);
   // A bigger window means fewer pages: step back when the page we were on no longer exists.
   const lastPage = resource.status === 'ready' ? Math.max(1, Math.ceil(resource.data.total / resource.data.pageSize)) : 1;
   const emptyPastEnd = resource.status === 'ready' && resource.data.appointments.length === 0 && resource.data.total > 0;

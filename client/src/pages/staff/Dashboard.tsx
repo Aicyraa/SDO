@@ -241,8 +241,8 @@ export function StaffHome() {
             : `All cleared · ${formatTerm(roster.data.term.academicYear, roster.data.term.semester)}`
           : undefined
       }
-      to="/clearance"
-      actionLabel="Open Clearance"
+      to="/students"
+      actionLabel="Open Students"
     >
       <Body resource={roster}>
         {({ term, data }) => {

@@ -63,7 +63,6 @@ describe('navGroups destinations', () => {
       '/cases',
       '/notices',
       '/appointments',
-      '/clearance',
       '/handbook',
       '/sanction-templates',
     ]);

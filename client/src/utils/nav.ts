@@ -68,7 +68,6 @@ const STAFF_GROUPS: NavGroup[] = [
       { to: '/cases', label: 'Cases', icon: 'gavel', badge: 'cases' },
       { to: '/notices', label: 'Notices', icon: 'campaign' },
       { to: '/appointments', label: 'Appointments', short: 'Schedule', icon: 'calendar_month', end: true },
-      { to: '/clearance', label: 'Clearance', icon: 'task_alt' },
     ],
   },
   {

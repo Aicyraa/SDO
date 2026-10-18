@@ -91,7 +91,10 @@ function CaseQueue({
     [queue.key, severity, q, page, fitted, page === null ? selectedId : null],
   );
   const listTotal = resource.status === 'ready' ? resource.data.total : undefined;
-  useEffect(() => setTotal(listTotal), [listTotal]);
+  // Keep the last known total while the next page loads: a total that vanished would change the page size and refetch for ever.
+  useEffect(() => {
+    if (listTotal !== undefined) setTotal(listTotal);
+  }, [listTotal]);
   useEffect(() => {
     reloadRef.current = resource.reload;
   }, [reloadRef, resource.reload]);

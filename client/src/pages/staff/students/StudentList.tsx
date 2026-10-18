@@ -34,7 +34,10 @@ export function StudentList({ selectedId, onFirstRow }: { selectedId: string | n
   const { areaRef, rows: fitted } = useFitRows(total);
   const list = useApi(() => studentsApi.students({ q: q || undefined, page, pageSize: fitted }), [q, page, fitted]);
   const listTotal = list.status === 'ready' ? list.data.total : undefined;
-  useEffect(() => setTotal(listTotal), [listTotal]);
+  // Keep the last known total while the next page loads: a total that vanished would change the page size and refetch for ever.
+  useEffect(() => {
+    if (listTotal !== undefined) setTotal(listTotal);
+  }, [listTotal]);
   // A bigger window means fewer pages: step back when the page we were on no longer exists.
   const lastPage = list.status === 'ready' ? Math.max(1, Math.ceil(list.data.total / list.data.pageSize)) : 1;
   useEffect(() => {

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import type { StaffStudentRecord } from '@shared/types';
 import { ConfirmModal } from '@/components/feedback';
 import { PageError } from '@/components/feedback/PageState';
 import { SkeletonPanel } from '@/components/feedback/Skeleton';
 import { StatusPill } from '@/components/ui';
+import { StudentClearance } from '@/components/clearance/StudentClearance';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Tag } from '@/components/ui/Tag';
@@ -24,7 +25,7 @@ const ACCENT: Record<RecordTile['accent'], string> = {
   primary: 'bg-primary',
 };
 
-/** One of the four tiles that act as tabs (src 952). The Clearance tile opens that student's clearance. */
+/** One of the four tiles that act as tabs (src 952). The Clearance tile opens that student's clearance below the tiles. */
 function RecordTileButton({ tile, selected, onPick }: { tile: RecordTile; selected: boolean; onPick: () => void }) {
   return (
     <button
@@ -122,7 +123,7 @@ function RecordLists({ data, tab }: { data: StaffStudentRecord; tab: RecordTab }
 }
 
 export function StudentRecordPane({ studentId }: { studentId: string }) {
-  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const record = useApi(() => studentsApi.student(studentId), [studentId]);
   // The Clearance tile reads this student's row of the current term (D3).
   const clearance = useApi(async () => {
@@ -130,7 +131,15 @@ export function StudentRecordPane({ studentId }: { studentId: string }) {
     const roster = await clearanceApi.clearanceRoster(current.academicYear, current.semester, { q: studentId });
     return { term: current, row: roster.students.find((row) => row.studentId === studentId) ?? null };
   }, [studentId]);
-  const [tab, setTab] = useState<RecordTab | null>(null);
+  // The chosen tile lives in the address (`?tab=clr&term=2026-1`), so a link opens the Clearance section directly.
+  const asked = params.get('tab');
+  const tab: RecordTab | null = asked === 'active' || asked === 'history' || asked === 'san' || asked === 'clr' ? asked : null;
+  const setTab = (key: RecordTab) => {
+    const next = new URLSearchParams(params);
+    next.set('tab', key);
+    if (key !== 'clr') next.delete('term');
+    setParams(next, { replace: true });
+  };
   const [confirming, setConfirming] = useState(false);
   const [temp, setTemp] = useState<string | null>(null);
 
@@ -181,19 +190,16 @@ export function StudentRecordPane({ studentId }: { studentId: string }) {
             key={tile.key}
             tile={tile}
             selected={tile.key === current}
-            onPick={() => {
-              if (tile.key !== 'clr') {
-                setTab(tile.key);
-                return;
-              }
-              const term = clearance.status === 'ready' ? `${clearance.data.term.academicYear}-${clearance.data.term.semester}` : '';
-              navigate(`/clearance/${profile.studentId}${term ? `?term=${term}` : ''}`);
-            }}
+            onPick={() => setTab(tile.key)}
           />
         ))}
       </div>
 
-      <RecordLists data={data} tab={current} />
+      {current === 'clr' ? (
+        <StudentClearance studentId={profile.studentId} name={name} onChanged={clearance.reload} />
+      ) : (
+        <RecordLists data={data} tab={current} />
+      )}
 
       <ConfirmModal
         open={confirming}

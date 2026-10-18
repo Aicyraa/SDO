@@ -39,7 +39,6 @@ describe('navGroups (deck src 2579)', () => {
       ['Cases', 'gavel'],
       ['Notices', 'campaign'],
       ['Appointments', 'calendar_month'],
-      ['Clearance', 'task_alt'],
       ['Violations', 'menu_book'],
       ['Sanction templates', 'folder_managed'],
     ]);
@@ -62,7 +61,7 @@ describe('navGroups (deck src 2579)', () => {
 
 describe('moreItems: the pages outside the tab bar', () => {
   test('staff and student', () => {
-    expect(moreItems('staff').map((item) => item.to)).toEqual(['/inbox', '/notices', '/clearance', '/handbook', '/sanction-templates']);
+    expect(moreItems('staff').map((item) => item.to)).toEqual(['/inbox', '/notices', '/handbook', '/sanction-templates']);
     expect(moreItems('student').map((item) => item.to)).toEqual(['/inbox', '/clearance', '/handbook']);
   });
 });
