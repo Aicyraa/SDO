@@ -65,12 +65,15 @@ export function MasterDetail({ list, detail, emptyDetail, ratio = 'even', backTo
     else navigate(listPath, { state: { fromList: true } });
   };
 
-  const pane = 'min-w-0 @min-[800px]:h-[var(--page-h)] @min-[800px]:overflow-y-auto';
+  // The pane never scrolls itself: that slices a card's border and corners. The card inside (`fill`) is capped at the
+  // pane's height and scrolls its own content, so its frame stays put.
+  const pane = 'min-w-0 @min-[800px]:h-[var(--page-h)] @min-[800px]:overflow-hidden';
+  const fill = '@min-[800px]:[&>*]:max-h-full @min-[800px]:[&>*]:overflow-y-auto';
   const open = detail !== null;
   return (
-    <div ref={containerRef} className="@container">
+    <div ref={containerRef} data-master-detail className="@container">
       <div className={cn('grid gap-6', RATIOS[ratio])}>
-        <div className={cn(pane, open && 'hidden @min-[800px]:block')}>{list}</div>
+        <div className={cn(pane, fill, open && 'hidden @min-[800px]:block')}>{list}</div>
         {open ? (
           <div className={pane}>
             <button
@@ -82,10 +85,10 @@ export function MasterDetail({ list, detail, emptyDetail, ratio = 'even', backTo
               {label}
             </button>
             {/* Records that fill their pane (`min-h-full`) measure against this box, not the pane plus the back bar. */}
-            <div className="@min-[800px]:h-full">{detail}</div>
+            <div className={cn('@min-[800px]:h-full', fill)}>{detail}</div>
           </div>
         ) : emptyDetail ? (
-          <div className={cn(pane, 'hidden @min-[800px]:block')}>{emptyDetail}</div>
+          <div className={cn(pane, fill, 'hidden @min-[800px]:block')}>{emptyDetail}</div>
         ) : null}
       </div>
     </div>

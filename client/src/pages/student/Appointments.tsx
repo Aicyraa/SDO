@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import type { StudentAppointmentView } from '@shared/types';
 import { PageError } from '@/components/feedback/PageState';
 import { SkeletonList } from '@/components/feedback/Skeleton';
-import { StatusPill } from '@/components/ui';
 import { EmptyBlock } from '@/components/ui/EmptyBlock';
 import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
 import { meApi } from '@/api/me';
@@ -30,7 +29,7 @@ function AppointmentCard({ appointment, selected }: { appointment: StudentAppoin
       aria-label={`Appointment ${appointment.code}`}
       className={cn('flex flex-col gap-3 rounded-xl border bg-white p-5', selected ? 'border-primary ring-[3px] ring-primary/18' : 'border-line')}
     >
-      {/* Top row: the date tile and, beside it, the dates, status and reason. Remarks and the code run full width under it. */}
+      {/* Top row: the date tile and, beside it, the dates, status and reason. Remarks run full width under it; the code and date sit top right. */}
       <div className="flex items-start gap-5">
         <div
           aria-hidden="true"
@@ -49,7 +48,9 @@ function AppointmentCard({ appointment, selected }: { appointment: StudentAppoin
               <p className="text-base font-bold text-ink">{dayRange(appointment.startDate, appointment.endDate)}</p>
               <p className="text-[13px] text-muted">Visit any day · 7:00 AM to 5:00 PM</p>
             </div>
-            <StatusPill status={appointment.status} kind="appointment" />
+            <p className="shrink-0 text-xs font-semibold text-muted">
+              {appointment.code} · {formatDate(appointment.dateUpdated)}
+            </p>
           </div>
           <div>
             <p className="text-xs font-semibold text-muted">Reason</p>
@@ -64,9 +65,6 @@ function AppointmentCard({ appointment, selected }: { appointment: StudentAppoin
             <p className="text-sm text-pretty wrap-anywhere text-ink">{remarks}</p>
           </div>
         ) : null}
-        <p className="text-xs text-muted">
-          {appointment.code} · Updated {formatDate(appointment.dateUpdated)}
-        </p>
       </div>
     </article>
   );

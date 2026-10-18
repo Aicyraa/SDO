@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { HandbookEntryView, SanctionTemplateView } from '@shared/types';
 import { StatusPill } from '@/components/ui';
+import { ListHeader } from '@/components/layout/ListHeader';
 import { ChipGroup } from '@/components/ui/ChipGroup';
 import { Icon } from '@/components/ui/Icon';
 import { ListCard } from '@/components/ui/ListCard';
@@ -26,12 +27,7 @@ export function TemplateList({
 
   return (
     <ListCard className="flex h-full flex-col">
-      <div className="border-b border-line-soft px-5 py-4">
-        <h2 className="text-[17px] font-bold text-ink">All sanctions</h2>
-        <p className="text-[13px] text-muted">
-          {posted} of {templates.length} have a template or requirements
-        </p>
-      </div>
+      <ListHeader title="All sanctions" subtitle={`${posted} of ${templates.length} have a template or requirements`} />
       <ChipGroup
         label="Filter sanctions"
         options={templateFilters(templates, entries)}

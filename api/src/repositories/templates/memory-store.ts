@@ -109,6 +109,16 @@ function createTx(state: MemoryTemplateState): TemplateTx {
       const found = state.sanctions.find((s) => s.sanctionId === sanctionId);
       return found ? { sanctionId: found.sanctionId, sanctionType: found.sanctionType } : null;
     },
+    async findSanctionByType(sanctionType) {
+      const needle = sanctionType.toLowerCase();
+      const found = state.sanctions.find((s) => s.sanctionType.toLowerCase() === needle);
+      return found ? { sanctionId: found.sanctionId } : null;
+    },
+    async insertSanction({ sanctionType, description }) {
+      const sanctionId = Math.max(0, ...state.sanctions.map((s) => s.sanctionId)) + 1;
+      state.sanctions.push({ sanctionId, sanctionType, description });
+      return sanctionId;
+    },
     async getTemplate(sanctionId) {
       return toRecord(state, sanctionId);
     },

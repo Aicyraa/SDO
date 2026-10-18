@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Spinner } from '@/components/feedback/PageState';
 import { Alert } from '@/components/ui/Alert';
@@ -108,10 +108,38 @@ export function StatRow({ children }: { children: ReactNode }) {
   return <div className="grid grid-cols-3 gap-2">{children}</div>;
 }
 
-/** The bordered list of rows inside a card (deck src 443). */
-export function RowBox({ children }: { children: ReactNode }) {
-  // Three rows tall even when empty, so a card keeps its size whether or not it has items.
-  return <div className="flex min-h-[172px] flex-1 flex-col overflow-hidden rounded-[10px] border border-line-soft">{children}</div>;
+/** Rows a card always shows room for, so a card keeps its size whether or not it has items. */
+const MIN_ROWS = 3;
+
+/**
+ * The rows of a dashboard card, as many as its box can hold (FINAL-POLISH-SPEC F1): the card is stretched by its
+ * neighbour in the grid, and the box measures itself and shows as many rows as fit, so no empty block is left
+ * under them. Rows keep their own size; the card's "View all" covers the rest.
+ */
+export function RowList({ items, empty }: { items: ReactNode[]; empty: ReactNode }) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [capacity, setCapacity] = useState(MIN_ROWS);
+  const measure = useCallback(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    const first = box.firstElementChild as HTMLElement | null;
+    // Rows overlap their neighbour's border by 1 px (`-mb-px`).
+    const step = first && first.offsetHeight > 1 ? first.offsetHeight - 1 : 55;
+    setCapacity(Math.max(MIN_ROWS, Math.floor(box.clientHeight / step)));
+  }, []);
+  useEffect(() => {
+    measure();
+    const box = boxRef.current;
+    if (!box || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [measure]);
+  return (
+    <div ref={boxRef} className="flex min-h-[172px] flex-1 flex-col overflow-hidden rounded-[10px] border border-line-soft">
+      {items.length === 0 ? empty : items.slice(0, capacity)}
+    </div>
+  );
 }
 
 /** One row: title (+ red flag), muted line, and an action on the right. */

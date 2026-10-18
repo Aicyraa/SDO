@@ -166,8 +166,8 @@ describe('clearanceRows (src 2841, D3)', () => {
       { academicYear: 2026, semester: 1 },
     );
     expect(rows).toEqual([
-      { key: '2023-1001230', title: 'Juan Dela Cruz · 2023-1001230', sub: '1 of 4 requirements done', flag: null, href: '/clearance/2023-1001230?term=2026-1' },
-      { key: '2023-1004560', title: 'Maria Santos · 2023-1004560', sub: 'Not set up for this term', flag: 'Not set', href: '/clearance/2023-1004560?term=2026-1' },
+      { key: '2023-1001230', title: 'Juan Dela Cruz · 2023-1001230', sub: '1 of 4 requirements done', flag: null, href: '/students/2023-1001230?tab=clr&term=2026-1' },
+      { key: '2023-1004560', title: 'Maria Santos · 2023-1004560', sub: 'Not set up for this term', flag: 'Not set', href: '/students/2023-1004560?tab=clr&term=2026-1' },
     ]);
   });
 });

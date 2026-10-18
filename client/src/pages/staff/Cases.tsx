@@ -17,6 +17,7 @@ import { Pager } from '@/components/ui/Pager';
 import { Tag } from '@/components/ui/Tag';
 import { casesApi } from '@/api/cases';
 import { useApi } from '@/hooks/useApi';
+import { useFitRows } from '@/hooks/useFitRows';
 import { caseRowView, groupHeads, queueFromParam, queueOptions, type QueueKey } from '@/utils/caseView';
 import { cn } from '@/utils/cn';
 import { manilaToday } from '@/utils/files';
@@ -73,6 +74,9 @@ function CaseQueue({
     return () => clearTimeout(timer);
   }, [search]);
 
+  // The list shows as many rows as its card holds (F1); the total, once known, tells whether a pager is needed.
+  const [total, setTotal] = useState<number | undefined>(undefined);
+  const { areaRef, rows: fitted } = useFitRows(total);
   const resource = useApi(
     () =>
       casesApi.staffCases({
@@ -81,10 +85,16 @@ function CaseQueue({
         q,
         group: queue.key === 'all' ? 'status' : undefined,
         page: page ?? 1,
+        pageSize: fitted,
         focus: page === null && selectedId !== null ? selectedId : undefined,
       }),
-    [queue.key, severity, q, page, page === null ? selectedId : null],
+    [queue.key, severity, q, page, fitted, page === null ? selectedId : null],
   );
+  const listTotal = resource.status === 'ready' ? resource.data.total : undefined;
+  // Keep the last known total while the next page loads: a total that vanished would change the page size and refetch for ever.
+  useEffect(() => {
+    if (listTotal !== undefined) setTotal(listTotal);
+  }, [listTotal]);
   useEffect(() => {
     reloadRef.current = resource.reload;
   }, [reloadRef, resource.reload]);
@@ -97,6 +107,11 @@ function CaseQueue({
   const counts = resource.status === 'ready' ? resource.data.statusCounts : null;
   const shownPage = resource.status === 'ready' ? resource.data.page : (page ?? 1);
   const pageCount = resource.status === 'ready' ? Math.max(1, Math.ceil(resource.data.total / resource.data.pageSize)) : 1;
+  // A bigger window means fewer pages: step back when the page we were on no longer exists.
+  const emptyPastEnd = resource.status === 'ready' && resource.data.cases.length === 0 && resource.data.total > 0;
+  useEffect(() => {
+    if (emptyPastEnd && page !== null && page > pageCount) setPage(pageCount);
+  }, [emptyPastEnd, page, pageCount]);
   const heads = resource.status === 'ready' && queue.key === 'all' ? groupHeads(resource.data.cases, resource.data.statusCounts) : new Map();
   const highlighted = selectedId ?? (firstId === undefined ? null : firstId);
 
@@ -153,7 +168,8 @@ function CaseQueue({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
+      <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
         {resource.status === 'loading' ? (
           <SkeletonList label="Loading cases…" />
         ) : null}
@@ -172,6 +188,7 @@ function CaseQueue({
                 <div key={row.id}>
                   {head ? <GroupHead tone={head.tone} label={head.label} count={head.count} unit={head.count === 1 ? 'case' : 'cases'} /> : null}
                   <Link
+                    data-fit-row
                     to={`/cases/${row.id}?queue=${queue.key}`}
                     state={FROM_QUEUE}
                     aria-current={selected ? 'true' : undefined}
@@ -210,6 +227,7 @@ function CaseQueue({
           : null}
       </div>
       <Pager page={shownPage} pageCount={pageCount} onChange={setPage} className="mt-auto border-t border-line-soft py-2.5" />
+      </div>
     </ListCard>
   );
 }

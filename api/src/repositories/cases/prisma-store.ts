@@ -478,8 +478,8 @@ export function createPrismaCaseQueries(
         where,
         include: listInclude,
         orderBy: [{ case_date: direction(filter) }, { disciplinary_case_id: direction(filter) }],
-        skip: (filter.page - 1) * CASE_PAGE_SIZE,
-        take: CASE_PAGE_SIZE,
+        skip: (filter.page - 1) * (filter.pageSize ?? CASE_PAGE_SIZE),
+        take: filter.pageSize ?? CASE_PAGE_SIZE,
       }),
       db.disciplinary_cases.count({ where }),
     ]);
@@ -497,7 +497,8 @@ export function createPrismaCaseQueries(
       .sort(compareCases(filter))
       .map((k) => k.id);
     const page = pageFor(ordered, filter);
-    const ids = ordered.slice((page - 1) * CASE_PAGE_SIZE, page * CASE_PAGE_SIZE);
+    const size = filter.pageSize ?? CASE_PAGE_SIZE;
+    const ids = ordered.slice((page - 1) * size, page * size);
     const loaded = await db.disciplinary_cases.findMany({ where: { disciplinary_case_id: { in: ids } }, include: listInclude });
     const byId = new Map(loaded.map((row) => [row.disciplinary_case_id, row]));
     return { rows: ids.flatMap((id) => (byId.has(id) ? [byId.get(id)!] : [])), total: ordered.length, page };

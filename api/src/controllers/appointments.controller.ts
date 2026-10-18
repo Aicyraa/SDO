@@ -38,7 +38,7 @@ export function createAppointmentController({ service, queries, now }: Appointme
       appointments: result.rows.map((row) => toStaffAppointmentView(row, today)),
       total: result.total,
       page: result.page,
-      pageSize: APPOINTMENT_PAGE_SIZE,
+      pageSize: input.value.pageSize ?? APPOINTMENT_PAGE_SIZE,
       counts: result.counts,
       statusCounts: result.statusCounts,
     });

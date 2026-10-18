@@ -35,7 +35,8 @@ export function createStudentsController({
     const input = parseStudentSearchQuery(request.query);
     if (!input.ok) return sendError(response, 400, 'invalid_input', input.message);
     const { q, page } = input.value;
-    const { total, rows } = await repo.searchStudents({ q, page, pageSize: STUDENT_PAGE_SIZE });
+    const pageSize = input.value.pageSize ?? STUDENT_PAGE_SIZE;
+    const { total, rows } = await repo.searchStudents({ q, page, pageSize });
     const body: StaffStudentListResponse = {
       students: await Promise.all(
         rows.map(async (row) => ({
@@ -47,7 +48,7 @@ export function createStudentsController({
       ),
       total,
       page,
-      pageSize: STUDENT_PAGE_SIZE,
+      pageSize,
     };
     sendOk(response, body);
   };

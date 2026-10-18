@@ -1,7 +1,8 @@
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { Icon } from './Icon';
+import { TooltipBubble } from './TooltipBubble';
 
 const hintVariants = cva('grid size-6 shrink-0 place-items-center rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30', {
   variants: {
@@ -18,13 +19,16 @@ const hintVariants = cva('grid size-6 shrink-0 place-items-center rounded-full o
 /**
  * A small status icon with a tooltip: shown on hover and keyboard focus, and toggled by a tap so it also works on
  * a phone. Screen readers get the same text as the button's name. Escape or leaving closes it.
+ * The tooltip is drawn under `<body>` (see TooltipBubble), so no card can clip it.
  */
 export function IconHint({ icon, label, tone, className }: { icon: string; label: string; className?: string } & VariantProps<typeof hintVariants>) {
   const [open, setOpen] = useState(false);
   const id = useId();
+  const buttonRef = useRef<HTMLButtonElement>(null);
   return (
     <span className="relative inline-flex" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
+        ref={buttonRef}
         type="button"
         aria-label={label}
         aria-describedby={open ? id : undefined}
@@ -38,15 +42,7 @@ export function IconHint({ icon, label, tone, className }: { icon: string; label
       >
         <Icon name={icon} filled className="!text-base" />
       </button>
-      {open ? (
-        <span
-          id={id}
-          role="tooltip"
-          className="absolute bottom-[calc(100%+6px)] left-1/2 z-20 w-max max-w-[220px] -translate-x-1/2 rounded-lg bg-ink px-2.5 py-1.5 text-xs leading-snug font-medium text-white shadow-lg"
-        >
-          {label}
-        </span>
-      ) : null}
+      {open ? <TooltipBubble anchor={buttonRef} id={id} label={label} /> : null}
     </span>
   );
 }

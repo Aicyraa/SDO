@@ -108,6 +108,6 @@ export function clearanceRows(rows: ClearanceRosterRow[], term: TermRef): DashRo
       title: `${row.name} · ${row.studentId}`,
       sub: row.clearance ? `${row.clearance.done} of ${row.clearance.total} requirements done` : 'Not set up for this term',
       flag: row.clearance ? null : 'Not set',
-      href: `/clearance/${row.studentId}?term=${term.academicYear}-${term.semester}`,
+      href: `/students/${row.studentId}?tab=clr&term=${term.academicYear}-${term.semester}`,
     }));
 }

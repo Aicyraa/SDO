@@ -13,6 +13,7 @@ import { ListCard } from '@/components/ui/ListCard';
 import { Pager } from '@/components/ui/Pager';
 import { appointmentsApi } from '@/api/appointments';
 import { useApi } from '@/hooks/useApi';
+import { useFitRows } from '@/hooks/useFitRows';
 import { groupHeadsFor, RANGE_OPTIONS, statusOptions } from '@/utils/appointments';
 import { cn } from '@/utils/cn';
 import { dayRange } from '@/utils/staffDashboard';
@@ -78,6 +79,9 @@ export function AppointmentList({
     return () => clearTimeout(timer);
   }, [search]);
 
+  // The list shows as many rows as its card holds (F1); the total, once known, tells whether a pager is needed.
+  const [total, setTotal] = useState<number | undefined>(undefined);
+  const { areaRef, rows: fitted } = useFitRows(total);
   const resource = useApi(
     () =>
       appointmentsApi.staffAppointments({
@@ -87,10 +91,22 @@ export function AppointmentList({
         range,
         on,
         page: page ?? 1,
+        pageSize: fitted,
         focus: page === null && selectedId !== null ? selectedId : undefined,
       }),
-    [q, status, range, on, page, page === null ? selectedId : null],
+    [q, status, range, on, page, fitted, page === null ? selectedId : null],
   );
+  const listTotal = resource.status === 'ready' ? resource.data.total : undefined;
+  // Keep the last known total while the next page loads: a total that vanished would change the page size and refetch for ever.
+  useEffect(() => {
+    if (listTotal !== undefined) setTotal(listTotal);
+  }, [listTotal]);
+  // A bigger window means fewer pages: step back when the page we were on no longer exists.
+  const lastPage = resource.status === 'ready' ? Math.max(1, Math.ceil(resource.data.total / resource.data.pageSize)) : 1;
+  const emptyPastEnd = resource.status === 'ready' && resource.data.appointments.length === 0 && resource.data.total > 0;
+  useEffect(() => {
+    if (emptyPastEnd && page !== null && page > lastPage) setPage(lastPage);
+  }, [emptyPastEnd, page, lastPage]);
   useEffect(() => {
     reloadRef.current = resource.reload;
   }, [reloadRef, resource.reload]);
@@ -176,7 +192,8 @@ export function AppointmentList({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
+      <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
         {resource.status === 'loading' ? (
           <SkeletonList label="Loading appointments…" />
         ) : null}
@@ -194,6 +211,7 @@ export function AppointmentList({
                 <div key={row.id}>
                   {head ? <GroupHead tone={head.tone} label={head.label} count={head.count} /> : null}
                   <Link
+                    data-fit-row
                     to={`/appointments/${row.id}`}
                     state={FROM_LIST}
                     aria-current={selected ? 'true' : undefined}
@@ -230,6 +248,7 @@ export function AppointmentList({
           className="mt-auto border-t border-line-soft py-2.5"
         />
       ) : null}
+      </div>
     </ListCard>
   );
 }

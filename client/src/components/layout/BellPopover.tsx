@@ -20,7 +20,7 @@ export function BellRow({ item, onOpen }: { item: NotificationView; onOpen: () =
       onClick={onOpen}
       aria-label={`${item.isRead ? '' : 'Unread. '}${item.title}. ${item.message}`}
       className={cn(
-        'flex w-full items-start gap-2.5 border-b border-line-soft px-3.5 py-2.5 text-left hover:bg-row-hover focus-visible:shadow-[inset_0_0_0_2px_var(--color-primary)] focus-visible:outline-none',
+        'flex w-full items-center gap-2.5 border-b border-line-soft px-3.5 py-2.5 text-left hover:bg-row-hover focus-visible:shadow-[inset_0_0_0_2px_var(--color-primary)] focus-visible:outline-none',
         item.isRead ? 'bg-white' : 'bg-tint-soft',
       )}
     >
@@ -32,7 +32,7 @@ export function BellRow({ item, onOpen }: { item: NotificationView; onOpen: () =
         <span className="line-clamp-2 text-[13px] leading-snug text-body">{item.message}</span>
         <span className="mt-0.5 block text-xs text-muted">{notificationWhen(item.dateCreated)}</span>
       </span>
-      <span aria-hidden="true" className={cn('mt-1.5 size-2 shrink-0 rounded-full', item.isRead ? 'bg-transparent' : 'bg-primary')} />
+      <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', item.isRead ? 'bg-transparent' : 'bg-primary')} />
     </button>
   );
 }

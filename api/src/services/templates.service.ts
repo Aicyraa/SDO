@@ -2,7 +2,7 @@ import { validateUpload, type UploadErrorCode, notPdfMessage } from '../domain/f
 import { PRESIGN_TTL_SECONDS, templateKey, type ObjectStorage } from '../integrations/storage/types.js';
 import type { TemplateStore } from '../repositories/templates/types.js';
 
-export type TemplateFailureCode = UploadErrorCode | 'not_found' | 'invalid_input';
+export type TemplateFailureCode = UploadErrorCode | 'not_found' | 'invalid_input' | 'sanction_exists';
 
 export interface TemplateFailure {
   ok: false;
@@ -23,6 +23,8 @@ export const FILES_PER_TEMPLATE = 1;
 export const MAX_TITLE_LENGTH = 200;
 export const MAX_DESCRIPTION_LENGTH = 2000;
 export const MAX_REQUIREMENTS_LENGTH = 4000;
+export const MAX_SANCTION_NAME_LENGTH = 80;
+export const MAX_SANCTION_DESCRIPTION_LENGTH = 500;
 
 const fail = (code: TemplateFailureCode, message: string): TemplateFailure => ({ ok: false, code, message });
 
@@ -51,6 +53,8 @@ function uploadMessage(code: UploadErrorCode, name: string): string {
 }
 
 export interface TemplateService {
+  /** Adds a sanction staff can then attach a template to; names are unique, ignoring case (staff). */
+  createSanction(input: { sanctionType: unknown; description: unknown }): Promise<TemplateResult<{ sanctionId: number }>>;
   /** Sets the template's title, description and written requirements (staff). */
   saveText(input: {
     employeeId: string;
@@ -83,6 +87,18 @@ export function createTemplateService({
   }
 
   return {
+    async createSanction({ sanctionType, description }) {
+      const name = text(sanctionType, MAX_SANCTION_NAME_LENGTH);
+      if (!name) return fail('invalid_input', `The sanction name is required, up to ${MAX_SANCTION_NAME_LENGTH} characters.`);
+      const about = text(description, MAX_SANCTION_DESCRIPTION_LENGTH);
+      if (!about) return fail('invalid_input', `The description is required, up to ${MAX_SANCTION_DESCRIPTION_LENGTH} characters.`);
+      return store.transaction(async (tx) => {
+        if (await tx.findSanctionByType(name)) return fail('sanction_exists', 'A sanction with that name already exists.');
+        const sanctionId = await tx.insertSanction({ sanctionType: name, description: about });
+        return { ok: true as const, sanctionId };
+      });
+    },
+
     async saveText({ employeeId, sanctionId, title, description, requirements }) {
       const titleText = text(title, MAX_TITLE_LENGTH);
       if (titleText === undefined) return fail('invalid_input', `The title must be text up to ${MAX_TITLE_LENGTH} characters.`);

@@ -21,6 +21,7 @@ export function createTemplateRouter({ service, reader }: TemplateRouterOptions)
 
   router.get('/sanction-templates', requireAuth, requirePasswordChanged, templates.list);
   router.get('/sanction-templates/files/:fileId/url', requireAuth, requirePasswordChanged, templates.fileUrl);
+  router.post('/sanction-templates', ...requireStaff, templates.create);
   router.put('/sanction-templates/:sanctionId', ...requireStaff, templates.saveText);
   router.post('/sanction-templates/:sanctionId/files', ...requireStaff, receive, templates.uploadFiles);
   router.delete('/sanction-templates/files/:fileId', ...requireStaff, templates.removeFile);

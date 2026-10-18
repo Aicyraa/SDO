@@ -15,19 +15,21 @@ import { notificationsApi } from '@/api/notifications';
 import { useAuth } from '@/context/AuthContext';
 import { useUnread } from '@/context/UnreadContext';
 import { useApi } from '@/hooks/useApi';
+import { useFitRows } from '@/hooks/useFitRows';
 import { cn } from '@/utils/cn';
-import { filterInbox, inboxChips, inboxEmptyText, INBOX_PAGE_SIZE, notificationLook, notificationWhen, pageOf, type InboxCategory } from '@/utils/inbox';
+import { filterInbox, inboxChips, inboxEmptyText, notificationLook, notificationWhen, pageOf, type InboxCategory } from '@/utils/inbox';
 
 /** One 80 px inbox row (deck src 1418 to 1426); the whole row opens the message. Rendered text is never markup. */
 export function InboxRow({ item, onOpen }: { item: NotificationView; onOpen: () => void }) {
   const look = notificationLook(item.kind);
   return (
     <button
+      data-fit-row
       type="button"
       onClick={onOpen}
       aria-label={`${item.isRead ? '' : 'Unread. '}${item.title}`}
       className={cn(
-        'flex min-h-20 w-full items-center py-2 gap-3 overflow-hidden border-b border-line-soft px-6 text-left outline-none transition-colors hover:bg-row-hover focus-visible:shadow-[inset_0_0_0_2px_var(--color-primary)]',
+        'flex h-20 w-full shrink-0 items-center gap-3 overflow-hidden border-b border-line-soft px-6 text-left outline-none transition-colors hover:bg-row-hover focus-visible:shadow-[inset_0_0_0_2px_var(--color-primary)]',
         item.isRead ? 'bg-white' : 'bg-tint-soft',
       )}
     >
@@ -64,7 +66,9 @@ export function InboxPage() {
 
   const all = useMemo(() => (resource.status === 'ready' ? resource.data.notifications : []), [resource]);
   const filtered = useMemo(() => filterInbox(all, category, unreadOnly), [all, category, unreadOnly]);
-  const shown = pageOf(filtered, page, INBOX_PAGE_SIZE);
+  // As many rows as the card holds (F1); the whole list's length says whether a pager is needed.
+  const { areaRef, rows: fitted } = useFitRows(resource.status === 'ready' ? filtered.length : undefined);
+  const shown = pageOf(filtered, page, fitted);
   const unread = resource.status === 'ready' ? resource.data.unreadCount : 0;
 
   async function openItem(item: NotificationView) {
@@ -102,7 +106,7 @@ export function InboxPage() {
   return (
     <>
       <h1 className="sr-only">Inbox</h1>
-      <section className="flex min-h-[var(--page-h)] flex-col overflow-hidden rounded-xl border border-line bg-white">
+      <section className="flex min-h-[var(--page-h)] flex-col overflow-hidden rounded-xl rail:h-[var(--page-h)] border border-line bg-white">
         <div className="flex flex-wrap items-center gap-2.5 border-b border-line-soft px-6 py-4">
           <ChipGroup
             label="Filter by category"
@@ -147,7 +151,8 @@ export function InboxPage() {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1">
+        <div ref={areaRef} className="flex min-h-0 flex-1 flex-col">
+        <div data-fit-body className="min-h-0 flex-1 overflow-y-auto">
           {resource.status === 'loading' ? (
             <SkeletonList label="Loading messages…" />
           ) : null}
@@ -164,6 +169,7 @@ export function InboxPage() {
           {role === 'staff' ? 'Showing messages for SDO staff. Notices you publish appear here too.' : 'Updates are also emailed to your school Outlook account.'}
         </p>
         <Pager page={shown.page} pageCount={shown.pages} onChange={setPage} className="mt-auto border-t border-line-soft py-2.5" />
+        </div>
       </section>
 
       <MessageDialog

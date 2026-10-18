@@ -68,12 +68,12 @@ describe('Sidebar (deck src 264)', () => {
 
 describe('More sheet', () => {
   test('lists only the pages the tab bar lacks, as one list with no group headings, current page highlighted', () => {
-    const html = at('/clearance', <MoreSheet items={moreItems('staff')} countFor={() => 0} onClose={() => undefined} />);
+    const html = at('/notices', <MoreSheet items={moreItems('staff')} countFor={() => 0} onClose={() => undefined} />);
     expect(html).toContain('aria-label="More"');
     expect(html).toContain('>More<');
     expect(html).toContain('>Inbox<');
     expect(html).toContain('>Notices<');
-    expect(html).toContain('>Clearance<');
+    expect(html).not.toContain('>Clearance<');
     expect(html).not.toContain('>Cases<');
     expect(html).not.toContain('>Overview<');
     expect(html).toMatch(/aria-current="page"[^>]*bg-row-selected/);

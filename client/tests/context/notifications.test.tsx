@@ -41,7 +41,7 @@ describe('InboxRow (deck src 1418)', () => {
 
   test('an unread row: blue dot, bold title, category pill, one-line message, Manila time; the whole row is one button', () => {
     const html = render(view());
-    expect(html).toMatch(/^<button type="button"/);
+    expect(html).toMatch(/^<button data-fit-row="true" type="button"/);
     expect(html).toContain('aria-label="Unread. Sanction verified"');
     expect(html).toContain('bg-primary');
     expect(html).toContain('font-bold');

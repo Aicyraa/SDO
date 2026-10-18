@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { Spinner } from '@/components/feedback/PageState';
 import Login from '@/pages/public/Login';
@@ -22,7 +22,6 @@ const StaffViolationsPage = page(() => import('@/pages/staff/Violations'), 'Staf
 const AppointmentsPage = page(() => import('@/pages/student/Appointments'), 'AppointmentsPage');
 const StaffAppointmentsPage = page(() => import('@/pages/staff/Appointments'), 'StaffAppointmentsPage');
 const ClearancePage = page(() => import('@/pages/student/Clearance'), 'ClearancePage');
-const StaffClearancePage = page(() => import('@/pages/staff/Clearance'), 'StaffClearancePage');
 const InboxPage = page(() => import('@/pages/shared/Inbox'), 'InboxPage');
 const ViolationsPage = page(() => import('@/pages/student/Violations'), 'ViolationsPage');
 const SanctionsPage = page(() => import('@/pages/student/Sanctions'), 'SanctionsPage');
@@ -36,8 +35,21 @@ const home = <RoleSwitch staff={<StaffHome />} student={<StudentDashboard />} />
 const handbook = <RoleSwitch staff={<StaffViolationsPage />} student={<StudentHandbookPage />} />;
 // Students see their own appointments, staff manage everyone's.
 const appointments = <RoleSwitch staff={<StaffAppointmentsPage />} student={<AppointmentsPage />} />;
-// A student reads their own checklist, staff set up and mark everyone's.
-const clearance = <RoleSwitch staff={<StaffClearancePage />} student={<ClearancePage />} />;
+/**
+ * Staff have no Clearance page any more: a student's clearance is a section of their record (FINAL-POLISH-SPEC F6).
+ * The old addresses still open it: `/clearance` the Students page, `/clearance/<id>?term=` that student's section.
+ */
+function StaffClearanceRedirect() {
+  const { id } = useParams();
+  const { search } = useLocation();
+  if (!id) return <Navigate to="/students" replace />;
+  const params = new URLSearchParams(search);
+  params.set('tab', 'clr');
+  return <Navigate to={`/students/${id}?${params.toString()}`} replace />;
+}
+
+// A student reads their own checklist; staff are sent to the student's record.
+const clearance = <RoleSwitch staff={<StaffClearanceRedirect />} student={<ClearancePage />} />;
 
 /** While a public page's chunk loads (signed-in pages show the Shell's own loading state instead). */
 function PublicPageLoading() {

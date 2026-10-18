@@ -1,4 +1,5 @@
 import { Icon } from '@/components/ui/Icon';
+import { IconButton } from '@/components/ui/IconButton';
 import { cn } from '@/utils/cn';
 
 const pill =
@@ -16,6 +17,7 @@ export function FileRow({
   onView,
   onReplace,
   onRemove,
+  actions = 'pill',
   className,
 }: {
   name: string;
@@ -25,6 +27,8 @@ export function FileRow({
   onView: () => void;
   onReplace?: () => void;
   onRemove?: () => void;
+  /** `pill`: labelled buttons (proofs). `icon`: round icon buttons with tooltips (template rows). */
+  actions?: 'pill' | 'icon';
   className?: string;
 }) {
   return (
@@ -41,6 +45,13 @@ export function FileRow({
         </p>
         <p className="text-xs text-muted">{meta}</p>
       </div>
+      {actions === 'icon' ? (
+        <div className="flex items-center gap-1.5">
+          <IconButton icon="visibility" label={`View ${name}`} tone="primary" onClick={onView} />
+          {onReplace ? <IconButton icon="swap_horiz" label={`Replace ${name}`} onClick={onReplace} /> : null}
+          {onRemove ? <IconButton icon="delete" label={`Remove ${name}`} tone="danger" onClick={onRemove} /> : null}
+        </div>
+      ) : (
       <div className="flex items-center gap-2">
         <button type="button" onClick={onView} className={cn(pill, 'border-primary bg-white text-primary hover:bg-primary-tint')}>
           <Icon name="visibility" className="!text-[18px]" />
@@ -63,6 +74,7 @@ export function FileRow({
           </button>
         ) : null}
       </div>
+      )}
     </div>
   );
 }

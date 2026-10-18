@@ -35,11 +35,10 @@ describe('navGroups (deck src 2579)', () => {
     expect(items('staff')).toEqual([
       ['Dashboard', 'space_dashboard'],
       ['Inbox', 'inbox'],
-      ['Cases', 'gavel'],
       ['Students', 'school'],
+      ['Cases', 'gavel'],
       ['Notices', 'campaign'],
       ['Appointments', 'calendar_month'],
-      ['Clearance', 'task_alt'],
       ['Violations', 'menu_book'],
       ['Sanction templates', 'folder_managed'],
     ]);
@@ -55,14 +54,14 @@ describe('navGroups (deck src 2579)', () => {
   test('badges: Inbox for both roles, Cases and Students for staff', () => {
     const badges = (role: 'staff' | 'student') =>
       navGroups(role).flatMap((group) => group.items.filter((item) => item.badge).map((item) => item.badge));
-    expect(badges('staff')).toEqual(['inbox', 'cases', 'students']);
+    expect(badges('staff')).toEqual(['inbox', 'students', 'cases']);
     expect(badges('student')).toEqual(['inbox']);
   });
 });
 
 describe('moreItems: the pages outside the tab bar', () => {
   test('staff and student', () => {
-    expect(moreItems('staff').map((item) => item.to)).toEqual(['/inbox', '/notices', '/clearance', '/handbook', '/sanction-templates']);
+    expect(moreItems('staff').map((item) => item.to)).toEqual(['/inbox', '/notices', '/handbook', '/sanction-templates']);
     expect(moreItems('student').map((item) => item.to)).toEqual(['/inbox', '/clearance', '/handbook']);
   });
 });
@@ -71,8 +70,8 @@ describe('phoneTabs (deck src 2588)', () => {
   test('four tabs with the short labels; the fifth place is More', () => {
     expect(phoneTabs('staff').map((tab) => [tab.to, tab.label])).toEqual([
       ['/', 'Home'],
-      ['/cases', 'Cases'],
       ['/students', 'Students'],
+      ['/cases', 'Cases'],
       ['/appointments', 'Schedule'],
     ]);
     expect(phoneTabs('student').map((tab) => [tab.to, tab.label])).toEqual([
@@ -84,7 +83,7 @@ describe('phoneTabs (deck src 2588)', () => {
   });
 
   test('tabs keep the badge of their nav entry', () => {
-    expect(phoneTabs('staff').map((tab) => tab.badge)).toEqual([undefined, 'cases', 'students', undefined]);
+    expect(phoneTabs('staff').map((tab) => tab.badge)).toEqual([undefined, 'students', 'cases', undefined]);
   });
 });
 

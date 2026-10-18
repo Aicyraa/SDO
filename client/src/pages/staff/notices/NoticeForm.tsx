@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { NoticeView } from '@shared/types';
-import { useToast } from '@/components/feedback';
+import { FormModal, useToast } from '@/components/feedback';
 import { Button } from '@/components/ui/Button';
 import { Field } from '@/components/ui/Field';
 import { Icon } from '@/components/ui/Icon';
@@ -11,8 +11,8 @@ import { manilaToday } from '@/utils/files';
 import { noticeToasts } from '@/utils/notices';
 import { noticeErrors, type NoticeDraft, type NoticeErrors } from '@/validators/notice';
 
-/** New or Edit notice (source src 1650 to 1662). */
-export function NoticeForm({ notice, onDone, onCancel }: { notice: NoticeView | null; onDone: (id: number | null) => void; onCancel: () => void }) {
+/** New or Edit notice (source src 1650 to 1662), as a dialog over the notices list. */
+export function NoticeForm({ notice, onDone, onCancel }: { notice: NoticeView | null; onDone: () => void; onCancel: () => void }) {
   const toast = useToast();
   const today = manilaToday();
   const [draft, setDraft] = useState<NoticeDraft>({
@@ -45,12 +45,11 @@ export function NoticeForm({ notice, onDone, onCancel }: { notice: NoticeView | 
       if (notice) {
         await noticesApi.editNotice(notice.id, body);
         toast.show(noticeToasts.updated, 'success');
-        onDone(notice.id);
       } else {
         const result = await noticesApi.publishNotice(body);
         toast.show(noticeToasts.published(result.recipients), 'success');
-        onDone(result.noticeId);
       }
+      onDone();
     } catch (error) {
       toast.show(toApiError(error).message, 'error');
       setBusy(false);
@@ -58,46 +57,53 @@ export function NoticeForm({ notice, onDone, onCancel }: { notice: NoticeView | 
   }
 
   return (
-    <section aria-label={notice ? 'Edit notice' : 'New important notice'} className="flex flex-col gap-4 rounded-xl border border-line bg-white p-6">
-      <div>
-        <h2 className="text-[22px] font-bold text-ink">{notice ? 'Edit notice' : 'New important notice'}</h2>
-        <p className="mt-1.5 text-[13px] text-pretty text-muted">
-          {notice
-            ? 'Changes show up for students right away. No new notification is sent.'
-            : 'Published notices appear in every student’s bell and inbox, and are emailed to their school account.'}
-        </p>
-      </div>
-      <Field label="Title" placeholder="e.g. Uniform inspection week" maxLength={120} value={draft.title} error={errors.title} onChange={(event) => set('title', event.target.value)} />
-      <Textarea label="Message" rows={4} maxLength={1000} value={draft.message} error={errors.message} onChange={(event) => set('message', event.target.value)} />
-      <Textarea
-        label="Instructions or reminders (optional)"
-        rows={3}
-        maxLength={1000}
-        placeholder="e.g. Bring a printed copy of your clearance form."
-        value={draft.instructions}
-        error={errors.instructions}
-        onChange={(event) => set('instructions', event.target.value)}
-      />
-      <div className="max-w-60">
-        <Field
-          label="Expiration date (optional)"
-          type="date"
-          min={today}
-          value={draft.expiresOn}
-          error={errors.expiresOn}
-          hint="Students stop seeing the notice after this date. Leave blank to keep it posted until you remove it."
-          onChange={(event) => set('expiresOn', event.target.value)}
+    <FormModal
+      open
+      icon="campaign"
+      title={notice ? 'Edit notice' : 'New important notice'}
+      subtitle={
+        notice
+          ? 'Changes show up for students right away. No new notification is sent.'
+          : 'Published notices appear in every student’s bell and inbox, and are emailed to their school account.'
+      }
+      busy={busy}
+      onClose={onCancel}
+      footer={
+        <>
+          <Button variant="neutral" onClick={onCancel} disabled={busy}>
+            Cancel
+          </Button>
+          <Button busy={busy} onClick={() => void save()}>
+            <Icon name="campaign" className="!text-xl" />
+            {notice ? 'Save changes' : 'Publish notice'}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <Field label="Title" placeholder="e.g. Uniform inspection week" maxLength={120} value={draft.title} error={errors.title} onChange={(event) => set('title', event.target.value)} />
+        <Textarea label="Message" rows={4} maxLength={1000} value={draft.message} error={errors.message} onChange={(event) => set('message', event.target.value)} />
+        <Textarea
+          label="Instructions or reminders (optional)"
+          rows={3}
+          maxLength={1000}
+          placeholder="e.g. Bring a printed copy of your clearance form."
+          value={draft.instructions}
+          error={errors.instructions}
+          onChange={(event) => set('instructions', event.target.value)}
         />
+        <div className="max-w-60">
+          <Field
+            label="Expiration date (optional)"
+            type="date"
+            min={today}
+            value={draft.expiresOn}
+            error={errors.expiresOn}
+            hint="Students stop seeing the notice after this date. Leave blank to keep it posted until you remove it."
+            onChange={(event) => set('expiresOn', event.target.value)}
+          />
+        </div>
       </div>
-      <div className="flex flex-wrap justify-end gap-2.5">
-        <Button variant="neutral" onClick={onCancel} disabled={busy}>
-          Cancel
-        </Button>
-        <Button busy={busy} onClick={() => void save()}>
-          <Icon name="campaign" className="!text-xl" />
-          {notice ? 'Save changes' : 'Publish notice'}
-        </Button>
-      </div>
-    </section>
+    </FormModal>
   );
 }

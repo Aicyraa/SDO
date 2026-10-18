@@ -1,5 +1,22 @@
 import { expect, test } from 'vitest';
-import { clampPage, pageCount, pageHolding, pagerItems } from '@/utils/pager';
+import { PAGER_HEIGHT, STACKED_ROWS, clampPage, fitRows, pageCount, pageHolding, pagerItems } from '@/utils/pager';
+
+test('fitRows keeps room for the pager strip until everything is known to fit', () => {
+  expect(fitRows({ areaHeight: 600, rowHeight: 72 })).toBe(Math.floor((600 - PAGER_HEIGHT) / 72));
+  expect(fitRows({ areaHeight: 600, rowHeight: 72, total: 8 })).toBe(8);
+  expect(fitRows({ areaHeight: 600, rowHeight: 72, total: 9 })).toBe(Math.floor((600 - PAGER_HEIGHT) / 72));
+});
+
+test('fitRows takes off the rows a measured overflow still needs, and stays between 3 and 50', () => {
+  expect(fitRows({ areaHeight: 600, rowHeight: 72, total: 20, trim: 2 })).toBe(Math.floor((600 - PAGER_HEIGHT) / 72) - 2);
+  expect(fitRows({ areaHeight: 120, rowHeight: 72 })).toBe(3);
+  expect(fitRows({ areaHeight: 9000, rowHeight: 20 })).toBe(50);
+});
+
+test('fitRows falls back to 10 before anything is measured', () => {
+  expect(fitRows({ areaHeight: 0, rowHeight: 72 })).toBe(STACKED_ROWS);
+  expect(fitRows({ areaHeight: 600, rowHeight: 0 })).toBe(STACKED_ROWS);
+});
 
 test('pageCount rounds up and is never below 1', () => {
   expect(pageCount(0, 6)).toBe(1);

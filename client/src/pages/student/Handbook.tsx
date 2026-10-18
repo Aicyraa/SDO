@@ -8,8 +8,8 @@ import { ClassTiles } from '@/components/student/ClassTiles';
 import { handbookApi } from '@/api/handbook';
 import { templatesApi } from '@/api/templates';
 import { useApi } from '@/hooks/useApi';
-import { hiddenByFilters } from '@/utils/studentView';
-import { HANDBOOK_PER_PAGE, filterHandbook, handbookTiles, type HandbookClass } from '@/utils/handbook';
+import { useFitRows } from '@/hooks/useFitRows';
+import { filterHandbook, handbookTiles, type HandbookClass } from '@/utils/handbook';
 import { HandbookEntry } from './handbook/HandbookEntry';
 import { HandbookTable } from './handbook/HandbookTable';
 
@@ -26,6 +26,13 @@ export function StudentHandbookPage() {
 
   const entries = handbook.status === 'ready' ? handbook.data.entries : [];
   const rows = filterHandbook(entries, query, cls);
+  // As many rows per page as the card holds (F1); the filtered count says whether a pager is needed.
+  const { areaRef, rows: perPage } = useFitRows(handbook.status === 'ready' ? rows.length : undefined);
+  // A taller window means fewer pages: step back when the page we were on no longer exists.
+  const lastPage = Math.max(1, Math.ceil(rows.length / perPage));
+  useEffect(() => {
+    if (page > lastPage) setPage(lastPage);
+  }, [page, lastPage]);
 
   // Arriving at an entry from elsewhere (a case's "View this offense") shows it on its page (5.4b).
   const fromList = (location.state as { fromList?: boolean } | null)?.fromList;
@@ -34,7 +41,7 @@ export function StudentHandbookPage() {
     if (target < 0 || fromList) return;
     setCls('all');
     setQuery('');
-    setPage(Math.floor(target / HANDBOOK_PER_PAGE) + 1);
+    setPage(Math.floor(target / perPage) + 1);
   }, [target, location.key, fromList]);
 
   if (handbook.status === 'loading') {
@@ -45,9 +52,7 @@ export function StudentHandbookPage() {
   if (handbook.status === 'error') return <PageError page="the Student Handbook" detail={handbook.error.message} onRetry={handbook.reload} />;
 
   const list = templates.status === 'ready' ? templates.data.templates : [];
-  // A selected entry the search or category hides is not shown beside a list that no longer holds it.
-  const hidden = hiddenByFilters(selectedId, entries, rows);
-  const current = selectedId === null || hidden ? rows[(page - 1) * HANDBOOK_PER_PAGE] : entries.find((e) => e.id === selectedId);
+  const current = selectedId === null ? rows[(page - 1) * perPage] : entries.find((e) => e.id === selectedId);
   const pane = current ? (
     <HandbookEntry key={current.id} entry={current} templates={list} />
   ) : selectedId !== null && !hidden ? (
@@ -79,6 +84,8 @@ export function StudentHandbookPage() {
                 setPage(1);
               }}
               page={page}
+              perPage={perPage}
+              areaRef={areaRef}
               onPage={setPage}
               selectedId={current?.id ?? null}
             />

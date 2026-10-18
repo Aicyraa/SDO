@@ -23,6 +23,7 @@ function build() {
 
 describe('access control', () => {
   const staffOnly: Array<[string, string]> = [
+    ['post', '/sanction-templates'],
     ['put', '/sanction-templates/1'],
     ['post', '/sanction-templates/1/files'],
     ['delete', '/sanction-templates/files/1'],
@@ -41,6 +42,44 @@ describe('access control', () => {
     const agent = await signedInAgent(build(), STUDENT_A.email);
     const response = await (agent as unknown as Record<string, (p: string) => Promise<{ status: number }>>)[method](path);
     expect(response.status).toBe(403);
+  });
+});
+
+describe('POST /sanction-templates (add a sanction, staff)', () => {
+  test('adds a sanction with no template yet; it then shows in the list with the next code', async () => {
+    const app = build();
+    const staff = await signedInAgent(app, STAFF.email);
+    const response = await staff.post('/sanction-templates').send({ sanctionType: '  Community Service  ', description: 'Hours of service.' });
+    expect(response.status).toBe(201);
+    expect(response.body.data.template).toMatchObject({
+      sanctionId: 4,
+      sanctionCode: 'S-004',
+      type: 'Community Service',
+      sanctionDescription: 'Hours of service.',
+      title: null,
+      files: [],
+    });
+    const list = await staff.get('/sanction-templates');
+    expect(list.body.data.templates.map((t: { type: string }) => t.type)).toContain('Community Service');
+  });
+
+  test('refuses a name that already exists, ignoring case, with 409', async () => {
+    const staff = await signedInAgent(build(), STAFF.email);
+    const response = await staff.post('/sanction-templates').send({ sanctionType: 'violation slip', description: 'Again.' });
+    expect(response.status).toBe(409);
+    expect(response.body.error).toMatchObject({ code: 'sanction_exists', message: 'A sanction with that name already exists.' });
+  });
+
+  test.each([
+    [{ sanctionType: '', description: 'x' }],
+    [{ sanctionType: 'x'.repeat(81), description: 'x' }],
+    [{ sanctionType: 'Name', description: '' }],
+    [{ sanctionType: 'Name', description: 'x'.repeat(501) }],
+    [{ sanctionType: 5, description: 'x' }],
+    [{}],
+  ])('refuses invalid input %j with 400', async (body) => {
+    const staff = await signedInAgent(build(), STAFF.email);
+    expect((await staff.post('/sanction-templates').send(body)).status).toBe(400);
   });
 });
 

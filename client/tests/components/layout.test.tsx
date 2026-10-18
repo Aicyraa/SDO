@@ -19,7 +19,9 @@ describe('MasterDetail v3 (side by side on wide screens, list then record screen
     expect(html).toContain('@container');
     expect(html).toContain('@min-[800px]:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]');
     expect(html).toContain('@min-[800px]:h-[var(--page-h)]');
-    expect(html).toContain('overflow-y-auto');
+    // The pane is clipped, never scrolled; the card inside scrolls its own content.
+    expect(html).toContain('@min-[800px]:overflow-hidden');
+    expect(html).toContain('@min-[800px]:[&amp;&gt;*]:overflow-y-auto');
   });
 
   test('narrow with a record open: the list hides and a back bar to the list sits above the record', () => {

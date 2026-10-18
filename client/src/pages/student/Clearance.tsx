@@ -6,7 +6,6 @@ import { SkeletonList } from '@/components/feedback/Skeleton';
 import { Icon } from '@/components/ui';
 import { Button } from '@/components/ui/Button';
 import { ChipGroup } from '@/components/ui/ChipGroup';
-import { Pill } from '@/components/ui/Pill';
 import { meApi } from '@/api/me';
 import { studentNextStep } from '@/utils/clearance';
 import { cn } from '@/utils/cn';
@@ -83,10 +82,6 @@ export function ClearancePage() {
             </p>
             {clearance ? (
               <>
-                <p className="my-2 flex flex-wrap gap-2">
-                  <Pill tone="pending">{items.length - done} remaining</Pill>
-                  <Pill tone="done">{done} completed</Pill>
-                </p>
                 <ProgressBar percent={percent} label="Clearance progress" tone={cleared ? 'green' : 'gold'} />
               </>
             ) : null}
