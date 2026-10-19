@@ -52,6 +52,7 @@ export function useFitRows(total?: number): { areaRef: (element: HTMLDivElement 
   // A new window size or list starts again from the full count; a measured overflow below takes rows off again.
   useEffect(() => setTrim(0), [measured?.area, measured?.fixed, total]);
 
+  const untrimmed = !measured || !measured.fixed ? STACKED_ROWS : fitRows({ areaHeight: measured.area, rowHeight: measured.row, total });
   const rows = !measured || !measured.fixed ? STACKED_ROWS : fitRows({ areaHeight: measured.area, rowHeight: measured.row, total, trim });
 
   // Rows are drawn: if the body still overflows (a group head, a row that wrapped), take off the rows it needs.
@@ -62,7 +63,13 @@ export function useFitRows(total?: number): { areaRef: (element: HTMLDivElement 
     const body = area.querySelector<HTMLElement>('[data-fit-body]');
     if (!body || !body.querySelector('[data-fit-row]')) return;
     const over = body.scrollHeight - body.clientHeight;
-    if (over > 1) setTrim((value) => value + Math.max(1, Math.ceil(over / measured.row)));
+    if (over <= 1) return;
+    // Absolute, not incremental: the rows drawn may still be the previous (larger) page while a refetch is in flight,
+    // and adding to the trim on every such render would shrink the page far below what fits.
+    const drawn = body.querySelectorAll('[data-fit-row]').length;
+    const target = Math.max(MIN_FIT_ROWS, drawn - Math.max(1, Math.ceil(over / measured.row)));
+    const needed = Math.max(0, untrimmed - target);
+    setTrim((value) => (value === needed ? value : needed));
   });
 
   useEffect(() => {
