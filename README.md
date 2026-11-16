@@ -1,206 +1,226 @@
-# Student Discipline Office Management System
+<h1 align="center">
+  <img src="client/public/icon-192.png" alt="Student Discipline Office Management System logo mark" width="56" align="absmiddle">
+  &nbsp;Student Discipline Office Management System
+</h1>
+
+<h4 align="center">Track disciplinary cases from report to clearance.</h4>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
-  <img src="https://img.shields.io/badge/TypeScript-Enabled-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Platform-Progressive%20Web%20App-5A0FC8?logo=pwa&logoColor=white" alt="PWA" />
-  <img src="https://img.shields.io/badge/Deployment-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel" />
-  <img src="https://img.shields.io/badge/Status-Deployed-success" alt="Deployed" />
+  A <b>database-backed discipline workflow</b> for <i>students, staff, and public gate reporting</i>. It combines a React SPA with an <code>Express</code> API, Prisma repositories, and protected file storage. Students and staff can follow cases, sanctions, appointments, clearance requirements, and notifications in one system.
+</p>
+<p align="center"><sub>Apache-2.0 licensed · TypeScript monorepo</sub></p>
+
+<p align="center">
+  <img alt="TypeScript 5.9" src="https://img.shields.io/badge/TypeScript-5.9-555555?style=for-the-badge&logo=typescript&logoColor=white&labelColor=3178C6">
+  <img alt="React 19.3" src="https://img.shields.io/badge/React-19.3-555555?style=for-the-badge&logo=react&logoColor=black&labelColor=61DAFB">
+  <img alt="Express 5.3" src="https://img.shields.io/badge/Express-5.3-555555?style=for-the-badge&logo=express&logoColor=white&labelColor=404040">
+  <img alt="Prisma 7.10" src="https://img.shields.io/badge/Prisma-7.10-555555?style=for-the-badge&logo=prisma&logoColor=white&labelColor=2D3748">
+  <img alt="Vite 8.3" src="https://img.shields.io/badge/Vite-8.3-555555?style=for-the-badge&logo=vite&logoColor=white&labelColor=646CFF">
+  <img alt="Tailwind CSS 4.3" src="https://img.shields.io/badge/Tailwind_CSS-4.3-555555?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=06B6D4">
 </p>
 
 <p align="center">
-  A Progressive Web App designed to streamline student disciplinary case management, sanction monitoring, appointment scheduling, and notifications for National University – Fairview.
+  <img src="client/src/assets/hero.png" alt="SDO Portal interface preview" width="90%">
 </p>
+<p align="center"><sub><i>Preview asset from the client application.</i></sub></p>
 
-<p align="center">
-  <a href="https://sdo-ten.vercel.app/"><strong>View Live Application</strong></a>
-</p>
+### What problem does it solve?
 
----
+Disciplinary records, sanctions, appointments, proof files, and clearance requirements need to move through a shared workflow instead of separate manual handoffs. Students need visibility into their own cases, while staff need tools to validate submissions, assign sanctions, schedule appointments, and manage notices. This system centralizes those operations behind role-aware API routes and a React client backed by Postgres repositories.
 
-## Table of Contents
+### Features
 
-- [Overview](#overview)
-- [Project Objectives](#project-objectives)
-- [Key Features](#key-features)
-- [User Roles](#user-roles)
-- [Technology Stack](#technology-stack)
-- [System Workflow](#system-workflow)
-- [Getting Started](#getting-started)
-- [Deployment](#deployment)
-- [Security and Privacy](#security-and-privacy)
+- **Case workflow**<br>Records, validates, rejects, resolves, and annotates disciplinary cases.
+- **Sanctions and proof**<br>Assigns sanctions and accepts student proof files for staff verification.
+- **Student handbook**<br>Lists handbook entries and supports staff maintenance of violations and sanctions.
+- **Appointments**<br>Creates, updates, completes, and cancels case-related appointments.
+- **Clearance tracking**<br>Sets up terms and tracks student clearance requirements through completion.
+- **Notifications**<br>Maintains student and shared staff inboxes and sends notification payloads to Power Automate.
+- **Public gate reports**<br>Accepts protected unauthenticated gate reports with a form token and rate limits.
+- **Role-aware access**<br>Uses Passport-local authentication, sessions, staff guards, and student guards across API routes.
 
-## Overview
+### Usage
 
-The **Student Discipline Office Management System** is a mobile-responsive Progressive Web App (PWA) developed to digitalize and organize disciplinary processes at National University – Fairview.
+Run the API and Vite client together, then open the client origin printed by Vite.
 
-The system provides a centralized platform for managing student violations, reviewing disciplinary cases, assigning sanctions, monitoring sanction progress, and coordinating appointments between students and the Student Discipline Office.
-
-By providing separate interfaces for students and administrators, the system aims to improve record organization, accessibility, and communication.
-
-| Project Information | Details |
-|---|---|
-| Project Name | Student Discipline Office Management System |
-| Institution | National University – Fairview |
-| Application Type | Progressive Web App (PWA) |
-| Target Users | Students and Discipline Office Administrators |
-| Frontend | React 19 and TypeScript |
-| Hosting Platform | Vercel |
-| Live Application | [sdo-ten.vercel.app](https://sdo-ten.vercel.app/) |
-
-## Project Objectives
-
-- Digitalize student disciplinary record management.
-- Improve the organization and accessibility of violation records.
-- Simplify the monitoring of assigned sanctions and required submissions.
-- Streamline appointment scheduling between students and administrators.
-- Provide timely notifications for relevant disciplinary updates.
-- Deliver a responsive interface for supported mobile and desktop browsers.
-
-## Key Features
-
-| Feature | Description |
-|---|---|
-| User Authentication | Provides a login interface and role-based access to the system. |
-| Student Dashboard | Allows students to view their disciplinary records, case statuses, and assigned sanctions. |
-| Case Management | Enables administrators to record violations, review cases, and manage case statuses. |
-| Sanction Management | Supports sanction assignment, progress monitoring, and document submissions. |
-| Digital Student Handbook | Provides searchable violation descriptions and corresponding sanctions. |
-| Appointment Scheduling | Allows administrators to assign appointments and students to view their schedules. |
-| Notifications | Communicates relevant case updates, sanction changes, and appointment information. |
-| Responsive Interface | Adapts the user interface to different supported screen sizes. |
-
-## User Roles
-
-### Student
-
-Students have access to features that help them monitor their disciplinary records and comply with assigned requirements.
-
-| Functionality | Description |
-|---|---|
-| View Records | Review accessible disciplinary records and case statuses. |
-| Monitor Sanctions | Track the progress of assigned sanctions. |
-| Submit Documents | Upload required files for applicable sanctions. |
-| Access Handbook | Search and review disciplinary violations and sanctions. |
-| View Appointments | Check appointments assigned by administrators. |
-| Receive Notifications | View relevant disciplinary updates and appointment notices. |
-
-### Administrator
-
-Administrators manage official disciplinary records and coordinate case-related activities.
-
-| Functionality | Description |
-|---|---|
-| Manage Cases | Record violations and review reported cases. |
-| Update Case Status | Maintain disciplinary case progress and related remarks. |
-| Assign Sanctions | Assign sanctions based on applicable school policies. |
-| Review Submissions | Check documents submitted for assigned sanctions. |
-| Manage Appointments | Assign students appointment dates, times, and reasons. |
-| Manage Notifications | Handle relevant updates and important notices. |
-
-## Technology Stack
-
-| Technology | Purpose |
-|---|---|
-| React 19 | Builds the user interface using reusable components. |
-| TypeScript | Provides static typing to help identify errors and improve maintainability. |
-| Progressive Web App (PWA) | Supports an app-like experience through compatible browsers and devices. |
-| Vercel | Hosts and deploys the application. |
-
-> Additional libraries, database services, and backend technologies should be listed here if they are part of the actual implementation.
-
-## System Workflow
-
-The general disciplinary case management process follows these stages:
-
-| Stage | Description |
-|---|---|
-| 1. Reported | A student violation is recorded in the system. |
-| 2. Validated | The administrator reviews the reported violation. |
-| 3. For Sanction | An appropriate sanction is assigned, and the student completes the required actions. |
-| 4. Resolved | The case is marked as resolved after the applicable requirements have been completed and reviewed. |
-
-This workflow provides a structured way to track disciplinary cases from initial reporting through resolution.
-
-## Getting Started
-
-### Access the Live Application
-
-The deployed application is available at:
-
-**[https://sdo-ten.vercel.app/](https://sdo-ten.vercel.app/)**
-
-Sign in using the appropriate account credentials if authentication is required.
-
-### Run the Project Locally
-
-To run the project locally, ensure that you have the following installed:
-
-- [Node.js](https://nodejs.org/)
-- npm, which is included with Node.js
-- The project's source code
-
-**1. Clone the repository**
-
-```bash
-git clone <repository-url>
-```
-
-**2. Navigate to the project directory**
-
-```bash
-cd <project-folder>
-```
-
-**3. Install dependencies**
-
-```bash
-npm install
-```
-
-**4. Start the development server**
+#### Run the main workflow
 
 ```bash
 npm run dev
 ```
 
-**5. Open the local application**
+The API exposes a dependency-free health probe at `GET /health`:
 
-Visit the local URL displayed in your terminal, commonly `http://localhost:5173` for Vite-based projects.
+```bash
+curl http://localhost:3000/health
+```
 
-> Replace `<repository-url>` and `<project-folder>` with the actual values. These commands assume the project uses npm and a compatible development setup.
+```json
+{"status":"ok"}
+```
 
-## Deployment
+### Environment and configuration
 
-The application is deployed through Vercel.
+Copy the safe example configuration before running the configured application:
 
-| Item | Details |
-|---|---|
-| Hosting Platform | Vercel |
-| Production URL | [https://sdo-ten.vercel.app/](https://sdo-ten.vercel.app/) |
-| Deployment Type | Web application deployment |
+```bash
+cp .env.example .env
+```
 
-## Security and Privacy
+#### Variables
 
-Because the system handles student disciplinary information, access to records should be restricted to authorized users.
+| Variable | Required | Description | Example |
+|---|---:|---|---|
+| `CLIENT_PORT` | No | Vite development and preview port | `5173` |
+| `SERVER_PORT` | No | Express API port; falls back to `PORT`, then `3000` | `3000` |
+| `DATABASE_URL` | For database mode | Pooled Neon Postgres URL for runtime access | `postgresql://example_user:...` |
+| `DATABASE_URL_UNPOOLED` | For Prisma CLI | Direct Neon Postgres URL for Prisma commands | `postgresql://example_user:...` |
+| `SESSION_SECRET` | For authentication | Server-side session signing secret | `example-session-secret-change-me-32-chars-min` |
+| `APP_BASE_URL` | Deployment | Client origin and base URL for email links | `http://localhost:5173` |
+| `VITE_API_URL` | Deployment only | API host exposed to the browser when it is separate | `https://api.example.edu` |
+| `PA_NOTIFY_URL` | Optional | Power Automate notification trigger URL | `https://example.invalid/powerautomate/notify` |
+| `PA_JOB_KEY` | Optional | Key for the internal term-setup job header | `example-job-secret-change-me-32-chars-min` |
+| `TRUST_PROXY` | Optional | Reverse-proxy count used for client IP handling | `1` |
+| `AWS_ACCESS_KEY_ID` | Storage mode | S3-compatible storage access key | `EXAMPLEACCESSKEYID` |
+| `AWS_SECRET_ACCESS_KEY` | Storage mode | S3-compatible storage secret | `example-secret-access-key` |
+| `AWS_ENDPOINT_URL_S3` | Storage mode | S3-compatible storage endpoint | `https://example.invalid` |
+| `AWS_REGION` | Storage mode | S3-compatible storage region | `us-east-2` |
+| `STORAGE_BUCKET_FILES` | Storage mode | Private bucket for student proof files | `assets-files` |
+| `STORAGE_BUCKET_TEMPLATES` | Storage mode | Private bucket for sanction templates | `assets-sanction-templates` |
 
-Recommended security practices include:
+#### Configuration files
 
-- Enforcing appropriate role-based permissions.
-- Protecting student information and uploaded documents.
-- Validating user inputs and file uploads.
-- Avoiding the exposure of sensitive information in public repositories.
-- Using environment variables for private configuration values.
-- Following the institution's applicable data privacy policies.
+The repository-root `.env` is read by both packages. Vite exposes only `VITE_` variables to browser code; do not put secrets in them. The API reads server settings through `api/src/config/`.
 
-## Academic Project
+### API reference
 
-This project is developed for academic purposes in the context of National University – Fairview.
+The Express API uses session cookies for authenticated browser requests. Routes are registered in `api/src/routes/index.ts`; all routes return the shared API response shapes except the plain `/health` probe.
 
-**Live Demo:** [Student Discipline Office Management System](https://sdo-ten.vercel.app/)
+#### `GET /health`
 
----
+Returns a database-independent liveness response.
 
-<p align="center">
-  <sub>Built to improve the organization and management of student disciplinary processes.</sub>
-</p>
+```json
+{"status":"ok"}
+```
+
+#### `POST /auth/login` and `POST /auth/logout`
+
+Starts or ends a Passport-local session. `GET /auth/me` returns the current authenticated account.
+
+#### `GET /me/cases` and `GET /me/sanctions`
+
+Returns the signed-in student's cases and sanctions.
+
+#### `GET /cases` and `POST /cases`
+
+Lists staff case records and records a case through the staff workflow.
+
+#### `GET /public/gate-form-options` and `POST /public/gate-reports`
+
+Provides public gate-form options and accepts a report protected by a form token and rate limits.
+
+#### Errors
+
+| Status | Meaning |
+|---:|---|
+| `400` | Invalid request data |
+| `401` | Authentication required |
+| `403` | Authenticated account lacks the required role |
+| `404` | Route or record not found |
+| `503` | Server configuration is unavailable |
+
+### Architecture
+
+```mermaid
+flowchart LR
+    Student[Student or staff browser]
+    Gate[Public gate form]
+    Client[React 19 + Vite SPA]
+    API[Express 5 API]
+    Auth[Passport-local authentication<br/>express-session]
+    Routes[Feature routes and controllers]
+    Services[Services and pure domain rules]
+    Repositories[Repositories<br/>Prisma stores or memory fakes]
+    DB[(Neon Postgres)]
+    Storage[(Neon Object Storage<br/>S3-compatible private buckets)]
+    Flow[Power Automate notification flow]
+
+    Student -->|uses| Client
+    Gate -->|submits protected report| API
+    Client -->|JSON requests with session cookie| API
+    API -->|checks credentials and session| Auth
+    Auth --> Routes
+    Routes --> Services
+    Services --> Repositories
+    Repositories -->|reads and writes records| DB
+    Services -->|uploads and signs file URLs| Storage
+    Services -->|sends notification envelope| Flow
+    API -->|JSON responses and errors| Client
+```
+
+<sub>Agent-created from the Express app, feature route registry, service layers, Prisma repositories, storage configuration, and notification integration.</sub>
+
+### Project structure
+
+```text
+api/                         Express API, services, repositories, and tests
+├── prisma/                  Prisma schema and migration files
+├── scripts/                 API maintenance and smoke scripts
+├── src/                     Routes, controllers, domain, config, and stores
+└── tests/                   API and view tests
+client/                      React SPA and client-side tests
+├── public/                  Browser icons and static assets
+├── src/                     Routes, pages, components, hooks, and API client
+└── tests/                   Client component, page, route, and utility tests
+docs/                        Project handoff and architecture documentation
+├── diagrams/                Repository architecture diagrams
+└── sdao-handoff/            Product specification and implementation rules
+shared/                      Types shared by the API and client
+.env.example                 Safe local configuration template
+package.json                 Root scripts for development and verification
+LICENSE                      Apache-2.0 license text
+```
+
+### Getting started
+
+#### Prerequisites
+
+- Node.js and npm
+- A cloned checkout of the repository
+- A root `.env` for configured database, session, storage, or notification features
+
+#### Clone and run
+
+```bash
+git clone https://github.com/Aicyraa/SDO.git
+cd SDO
+npm install
+npm --prefix api install
+npm --prefix client install
+npm run dev
+```
+
+#### Run the tests
+
+```bash
+npm test
+```
+
+For a complete local verification pass:
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+### Contributors
+
+<a href="https://github.com/Aicyraa/SDO/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Aicyraa/SDO" alt="Contributors" />
+</a>
+
+### License
+
+Distributed under the Apache-2.0 License. See [`LICENSE`](LICENSE) for details.
